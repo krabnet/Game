@@ -21,18 +21,12 @@ namespace Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        private int previousScrollValue;
-        private SpriteFont font;
+        //private int drawDistanceWidth = 100;
+        //private int drawDistanceHeight = 300;
         private Model model;
-        private Util.Camera2D Cam;
-        Actions.RollDice RD = new Actions.RollDice();
-        Util.Base Utils = new Util.Base();
-        SoundEffect soundEffect;
-        protected Song song;
-        private bool RunFullScreenToggle = false;
-        private bool GamePaused = false;
-        private Objects.Spite2d Background = new Objects.Spite2d();
-        private Color DayColor;
+        private Objects.Sprite2d Background = new Objects.Sprite2d();
+        private Effect ripple;
+        private Texture waterfallTexture;
         //Video video;
         //VideoPlayer player;
 
@@ -49,46 +43,27 @@ namespace Game
             Util.Global.screenSizeHeight = graphics.PreferredBackBufferHeight - 100;
             Util.Global.screenSizeWidth = graphics.PreferredBackBufferWidth - 100;
             Content.RootDirectory = "Content";
+            IsFixedTimeStep = true;
+
         }
 
         protected override void Initialize()
         {
-            //video = Content.Load<Video>("Wildlife");
-            //player = new VideoPlayer();
-
-            song = Content.Load<Song>("Music/town");  // Put the name of your song here instead of "song_title"
-            MediaPlayer.Play(song);
-            soundEffect = Content.Load<SoundEffect>("Sounds/EscapeMenu");
-            previousScrollValue = 0;
-            Cam = new Util.Camera2D(GraphicsDevice.Viewport);
-            //SpeechSynthesizer synth = new SpeechSynthesizer();
-            //synth.SetOutputToDefaultAudioDevice();
-            //synth.Speak("Welcome to the game!");
-            new Maps.Asset().PopulateContent(Content);
-            new Objects.Menu().DefaultMenu();
-            new Actions.Fight().init();
-            Util.Global.MainMap = new Maps.Map[100, 100, 100];
-
-            Maps.Map Smap = new Maps.Map();
-            Smap.GenerateBaseMap(new Vector3(5,5,0));
-            Smap.AddMapPart(Maps.MapPart.courtyard, 10, 10);
-            Smap.AddMapPart(Maps.MapPart.room, 2, 2);
-            //Smap.AddMapPart(Maps.MapPart.stream, 20, 10);
-            Maps.Map Smap2 = new Maps.Map();
-            Smap2.GenerateBaseMap(new Vector3(6, 5, 0));
-            Smap2.AddMapPart(Maps.MapPart.stream, 10, 10);
-
-            new Maps.Map().LoadMapByInt(5, 5, 0);
-
-            DayColor = Color.White;
+            Util.Global.ContentMan = Content;
+            Util.Global.Cam = new Util.Camera2D(GraphicsDevice.Viewport);
+            GraphicsDevice.Clear(Color.Black);
+            new Util.Main().Init();
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            font = Content.Load<SpriteFont>("Font/Font1");
+            Util.Global.font = Content.Load<SpriteFont>("Font/SpriteFont1");
             model = Content.Load<Model>("3dModel/cube");
+
+            ripple = Content.Load<Effect>("Effect/ripple");
+            waterfallTexture = Content.Load<Texture>("Texture/waterfall");
         }
 
         protected override void UnloadContent()
@@ -97,285 +72,234 @@ namespace Game
 
         protected override void Update(GameTime gameTime)
         {
-            KeyboardState state = Keyboard.GetState();
-            MouseState ms = Mouse.GetState();
-
-            //if (player.State == MediaState.Stopped)
-            //{
-            //    player.IsLooped = true;
-            //    player.Play(video);
-            //}
-
-            //new Util.Camera2D(GraphicsDevice.Viewport).Update();
-
-            if(state.IsKeyDown(Keys.Escape))
+            try
             {
-                System.Threading.Thread.Sleep(200);
-                if (Util.Global.Menus.Where(x => x.name == "Exit").FirstOrDefault().active == true)
+
+                if (Util.Global.QuitGameToggle)
                 {
-                    GamePaused = false;
-                    Util.Global.Menus.Where(x => x.name == "Exit").FirstOrDefault().active = false;
-                    Util.Global.Menus.Where(x => x.name == "FullScreen").FirstOrDefault().active = false;
-                    soundEffect.Play();
-                    MediaPlayer.Resume();
-                    new Actions.Inventory().HideInventory();
+                    this.Exit();
+                }
+
+                KeyboardState state = Keyboard.GetState();
+                MouseState ms = Mouse.GetState();
+                Util.GameKey.Key(state);
+
+                foreach (Objects.Sprite2d A in Util.Global.Sprites.Where(x => x.active == true && x.controlType == Objects.Base.ControlType.Mouse))
+                {
+                    A.MouseInput(ms);
+                }
+
+                if (Util.Global.PreviousMouseState == ms)
+                {
+                    Util.Global.GameMouseTime = Util.Global.GameMouseTime + 1;
                 }
                 else
                 {
-                    GamePaused = true;
-                    Util.Global.Menus.Where(x => x.name == "Exit").FirstOrDefault().active = true;
-                    Util.Global.Menus.Where(x => x.name == "FullScreen").FirstOrDefault().active = true;
-                    soundEffect.Play();
-                    MediaPlayer.Pause();
-                    new Actions.Inventory().ShowInventory();
+                    if ((ms.LeftButton == ButtonState.Pressed && Util.Global.PreviousMouseState.LeftButton == ButtonState.Released) || (ms.RightButton == ButtonState.Pressed && Util.Global.PreviousMouseState.RightButton == ButtonState.Released))
+                    {
+                        Util.GameMouse.MouseClick(ms);
+                    }
+                    Util.Global.PreviousMouseState = ms;
+                    Util.Global.GameMouseTime = 0;
                 }
-            }
+                this.IsMouseVisible = true;
+                if (this.IsActive && Util.Global.GameMouseTime > 200)
+                {
+                    this.IsMouseVisible = false;
+                }
+                if (Util.Global.Sprites.Where(x => x.Item != null && x.Item.State == Items.Item.ItemState.Hand).Count() > 0)
+                {
+                    this.IsMouseVisible = false;
+                }
 
-            Objects.Menu returnMenu = new Objects.Menu();
-            Objects.AnimSprite returnSprite = new Objects.AnimSprite();
-            if (ms.LeftButton == ButtonState.Pressed || ms.RightButton == ButtonState.Pressed)
+
+                if (Util.Global.Fighting == false)
+                {
+                    Util.Global.Cam.Pos = (Util.Global.Hero.Position * -1) + new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+                }
+                Util.Global.Cam.Update();
+
+                Util.Global.PreviousKeyboardState = state;
+
+                if (!Util.Global.PauseGameToggle)
+                {
+                    Actions.Season.UpdateClock(gameTime);
+
+                    Objects.Sprite2d[] SIRcheck = Util.Global.Sprites.Where(l => l.actionCall != null && l.actionCall.Any(y => y.ActionType == Actions.ActionType.MouseCollision)).ToArray();
+
+                    int updateCount = 0;
+                    //Objects.Sprite2d[] SIR = Util.Global.Sprites.Where(r => (r.Actor != null) || (r.actionCall.Count() > 0) || (r.Maneuver != null) || (r.Position.X < Util.Global.Hero.Position.X + drawDistanceWidth && r.Position.Y < Util.Global.Hero.Position.Y + drawDistanceHeight && r.Position.X > Util.Global.Hero.Position.X - drawDistanceWidth && r.Position.Y > Util.Global.Hero.Position.Y - drawDistanceHeight)).ToArray();
+                    Objects.Sprite2d[] SIR = Util.Global.Sprites.Where(r => (r.Actor != null) || (r.actionCall.Count() > 0) || (r.Maneuver != null) || Vector2.Distance(r.Position, Util.Global.Hero.Position) < Util.Global.DrawDistance).ToArray();
+                    Objects.Sprite2d[] SIR2 = SIR.Where(x => x.active == true && (x.AnimSprite != null && x.AnimSprite.action == true) || (x.actionCall.Count() > 0) || (x.Maneuver != null) || (x.Actor != null)).ToArray().OrderByDescending(y => y.orderNum).ToArray();
+                    foreach (Objects.Sprite2d A in SIR2)
+                    {
+                        A.Update(state, gameTime);
+                        updateCount++;
+                        //Util.Base.Log("updateCount:" + updateCount.ToString());
+                        //Util.Base.Log(A.name + " " + A.Position.X.ToString() + ":" + A.Position.Y.ToString());
+                    }
+
+                }
+                base.Update(gameTime);
+            }
+            catch (Exception ex)
             {
-                returnMenu = Utils.GetMenuClick(Util.Global.GameMouse);
-               if (returnMenu.name == "Exit")
-               { this.Exit(); }
-               if (returnMenu.name == "FullScreen")
-               {
-                   RunFullScreenToggle = true;
-               }
-               if (returnMenu.actionCall != null)
-               {
-                   returnMenu.boxColor = Color.Red;
-                   Utils.CallMethodByString(returnMenu.actionCall.actionType, returnMenu.actionCall.actionMethodName, returnMenu.actionCall.parameters);
-               }
-
-               returnSprite = Utils.GetAnimatedSpriteClick(Util.Global.GameMouse);
-               if (returnSprite.name != null && !GamePaused && returnSprite.actionType == Objects.Base.ActionType.Mouse)
-               {
-                   if (returnSprite.actionCall != null)
-                   {
-                       Utils.CallMethodByString(returnSprite.actionCall.actionType, returnSprite.actionCall.actionMethodName, returnSprite.actionCall.parameters);
-                   }
-                   returnSprite.action = true;
-               }
-
-               Objects.Spite2d return2dSprite = Utils.GetSpriteClick(Util.Global.GameMouse);
-               if (return2dSprite.name != null && !GamePaused && return2dSprite.actionType == Objects.Base.ActionType.Mouse)
-               {
-                   if (return2dSprite.actionCall != null)
-                   {
-                       Utils.CallMethodByString(return2dSprite.actionCall.actionType, return2dSprite.actionCall.actionMethodName, return2dSprite.actionCall.parameters);
-                   }
-                   if (return2dSprite.actionCallB != null && ms.RightButton == ButtonState.Pressed)
-                   {
-                       Utils.CallMethodByString(return2dSprite.actionCallB.actionType, return2dSprite.actionCallB.actionMethodName, return2dSprite.actionCallB.parameters);
-                   }
-                   //return2dSprite.action = true;
-               }
-
+                Util.Base.Log("Main Update Failure: "+ ex.Message);
             }
-            Util.Global.GameMouse.MouseInput(ms);
-            if (!GamePaused)
-            {
-                foreach (Actions.Anim a in Util.Global.Anim.Where(x => x.active == true).ToList())
-                {
-                    if (gameTime.TotalGameTime.Milliseconds % 100 == 0)
-                    {
-                        a.update();
-                    }
-                }
-                
-                foreach (Objects.Spite2d m in Util.Global.Sprites.Where(x => x.active == true).ToList())
-                {
-                    if (m.controlType == Objects.Base.ControlType.Keyboard)
-                    { m.KeyInput(state); }
-                    if (m.controlType == Objects.Base.ControlType.Mouse)
-                    { m.MouseInput(ms); }
-                    if (m.actionCall != null)
-                    {
-                        if (m.actionType == Objects.Base.ActionType.Collision)
-                        {
-                            if (Utils.collision(m, Util.Global.Hero.HeroSprite))
-                            {
-                                Utils.CallMethodByString(m.actionCall.actionType, m.actionCall.actionMethodName, m.actionCall.parameters);
-                                if (m.collisionSound != null)
-                                { m.collisionSound.Play(); }
-                            }
-                        }
-                    }
-                }
-                foreach (Objects.Text m in Util.Global.Texts.Where(x => x.active == true).ToList())
-                {
-                    if (m.controlType == Objects.Base.ControlType.Keyboard)
-                    { m.KeyInput(state); }
-                    if (m.controlType == Objects.Base.ControlType.Mouse)
-                    { m.MouseInput(ms); }
-                }
-
-                foreach (Objects.AnimSprite m in Util.Global.SpritesAnim.Where(x => x.action == true && x.name != "Hero").ToList())
-                {
-                    if (gameTime.TotalGameTime.Milliseconds % m.speed == 0)
-                    {
-                        m.Update();
-                    }
-                }
-
-                foreach (Objects.Spite2d m in Util.Global.Sprites.Where(x => x.actionType == Objects.Base.ActionType.Update && x.active == true).ToList())
-                {
-                    if (gameTime.TotalGameTime.Milliseconds % m.speed == 0 && m.actionCall != null)
-                    {
-                        Utils.CallMethodByString(m.actionCall.actionType, m.actionCall.actionMethodName, m.actionCall.parameters);
-                    }
-                }
-                foreach (Objects.AnimSprite m in Util.Global.SpritesAnim.Where(x => x.actionType == Objects.Base.ActionType.Update && x.active == true).ToList())
-                {
-                    if (gameTime.TotalGameTime.Milliseconds % m.speed == 0 && m.actionCall != null)
-                    {
-                        Utils.CallMethodByString(m.actionCall.actionType, m.actionCall.actionMethodName, m.actionCall.parameters);
-                    }
-                }
-
-
-                if (!Util.Global.Fighting && (state.IsKeyDown(Keys.W) || state.IsKeyDown(Keys.A) || state.IsKeyDown(Keys.S) || state.IsKeyDown(Keys.D)))
-                {
-                    if (gameTime.TotalGameTime.Milliseconds % 100 == 0)
-                    { Util.Global.Hero.HeroSprite.Update(); }
-                    Util.Global.Hero.HeroSprite.KeyInput(state);
-                }
-
-                if (ms.ScrollWheelValue < previousScrollValue)
-                {
-                    //new Util.Base().SizeTiles(-5);
-                    Cam.Zoom -= 0.1f;
-                    //Util.Global.WindowBoarder += 50;
-
-                }
-                if (ms.ScrollWheelValue > previousScrollValue)
-                {
-                    //new Util.Base().SizeTiles(5);
-                    Cam.Zoom += 0.1f;
-                    //Util.Global.WindowBoarder -= 50;
-                }
-                previousScrollValue = ms.ScrollWheelValue;
-                //Cam.Pos = new Vector2(GameHero.x*-1,GameHero.y*-1);
-                Cam.Update();
-
-                 //int mousex =   Util.Global.Sprites.Where(a => a.name == "mouse").FirstOrDefault().x;
-                 //int mousey =   Util.Global.Sprites.Where(a => a.name == "mouse").FirstOrDefault().y;
-                 //Util.Global.Texts.Where(x => x.name == "mouseCord").FirstOrDefault().text = string.Format("{0}:{1}", mousex.ToString(), mousey.ToString());
-                 //Util.Global.Texts.Where(x => x.name == "mouseCord").FirstOrDefault().x = mousex;
-                 //Util.Global.Texts.Where(x => x.name == "mouseCord").FirstOrDefault().y = mousey;
-            }
-           
-            //SpritesAnim.FirstOrDefault().KeyInput(state);
-            //if (gameTime.TotalGameTime.Milliseconds % 10 == 0)
-            //{ SpritesAnim.FirstOrDefault().Update(); }
-            //int Tilex = Sprites.Where(x => x.name == "Tile").FirstOrDefault().x;
-            //int Tiley = Sprites.Where(x => x.name == "Tile").FirstOrDefault().y;
-            //Texts.Where(x => x.name == "TileText").FirstOrDefault().vector = new Vector2(Tilex, Tiley);
-            //Texts.Where(x => x.name == "TileText").FirstOrDefault().text = string.Format("{0}/{1}", Tilex.ToString(), Tiley.ToString());
-            //Texts.Where(x => x.name == "GameTime").FirstOrDefault().text = string.Format("{0}",gameTime.TotalGameTime.Seconds);
-
-            //if(ms.LeftButton == ButtonState.Pressed)
-            //{
-            //    RD.Roll(gameTime.TotalGameTime.Seconds);
-            //}
-
-            //RD.update(gameTime);
-
-
-            //explosion.Update();
-            //position += new Vector3(0, 0.01f, 0);
-            //angle += 0.03f;
-            //world = Matrix.CreateRotationY(angle) * Matrix.CreateTranslation(position);
-            // Allows the game to exit
-            //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-            //    this.Exit();
-            Util.Global.GameClock = gameTime.TotalGameTime;
-            float F = Util.Global.GameClock.Seconds / 20.0f ;
-            DayColor = LerpColor(Color.White, Color.Gray,F);
-            if (F >= .8)
-            {
-                Util.Global.GameClock = new TimeSpan(0);
-            }
-
-            base.Update(gameTime);
-        }
-
-        private Color LerpColor(Color a, Color b, float percentage)
-        {
-            return new Color(
-                (byte)MathHelper.Lerp(a.R, b.R, percentage),
-                (byte)MathHelper.Lerp(a.G, b.G, percentage),
-                (byte)MathHelper.Lerp(a.B, b.B, percentage),
-                (byte)MathHelper.Lerp(a.A, b.A, percentage));
+            
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            if (RunFullScreenToggle)
+            try
             {
-                graphics.ToggleFullScreen();
-                RunFullScreenToggle = false;
+                GraphicsDevice.Clear(Color.Black);
+                if (Util.Global.ScreenShotFlag)
+                {
+                    GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+                    GraphicsDevice.PrepareScreenShot();
+                }
+
+                Util.Global.screenSizeWidth = GraphicsDevice.Viewport.Width;
+                Util.Global.screenSizeHeight = GraphicsDevice.Viewport.Height;
+                //drawDistanceWidth = Util.Global.screenSizeWidth;
+                //drawDistanceHeight = Util.Global.screenSizeHeight;
+                if (Util.Global.RunFullScreenToggle)
+                {
+                    graphics.ToggleFullScreen();
+                    Util.Global.RunFullScreenToggle = false;
+                }
+                if (Util.Global.Fighting)
+                {
+                    //drawDistanceWidth = drawDistanceWidth + 100;
+                    //drawDistanceHeight = drawDistanceHeight + 100;
+                }
+
+                int DrawCount = 0;
+
+                GraphicsDevice.Textures[1] = waterfallTexture;
+                ripple.Parameters["DisplacementScroll"].SetValue(MoveInCircle(gameTime, 0.1f));
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.Default, RasterizerState.CullNone, ripple, Util.Global.Cam.Transform);
+                foreach (Objects.Sprite2d S in Util.Global.Sprites.Where(x => x.effectType == Objects.Base.EffectType.Ripple && x.active == true && x.Viewtype == Objects.Base.ViewType.Default && Vector2.Distance(x.Position, Util.Global.Hero.Position) < Util.Global.DrawDistance).OrderBy(O => O.orderNum))
+                {
+                    Color DrawColor = Util.Global.DayColor;
+                    if (Util.Global.DayColor.G < 152)
+                    {
+                        foreach (Tuple<int, int, float> V in Util.Global.Lights)
+                        {
+                            if (Util.Base.collision(S.Position, V.Item3, new Rectangle((int)V.Item1, (int)V.Item2, 70, 70)))
+                            {
+                                DrawColor = Color.LightGray;
+                            }
+                            if (Util.Base.collision(S.Position, V.Item3 / 2f, new Rectangle((int)V.Item1, (int)V.Item2, 70, 70)))
+                            {
+                                DrawColor = Color.White;
+                            }
+                        }
+                    }
+                    if (S.LightIgnor == true)
+                    {
+                        DrawColor = S.color;
+                    }
+                    S.Draw(GraphicsDevice, spriteBatch, DrawColor);
+                    DrawCount++;
+                }
+                spriteBatch.End();
+
+
+                //GraphicsDevice.PrepareScreenShot();
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null, Util.Global.Cam.Transform);
+                //Util.Global.ScreenShotRender = new RenderTarget2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+                //GraphicsDevice.SetRenderTarget(Util.Global.ScreenShotRender);
+
+                //spriteBatch.Begin();
+                //spriteBatch.Draw(Util.Global.GameBackground.model, new Rectangle(Util.Global.GameBackground.x, Util.Global.GameBackground.y, Util.Global.GameBackground.sizex, Util.Global.GameBackground.sizey), Color.White);
+                //foreach (Objects.Sprite2d S in Util.Global.Sprites.Where(x => x.effectType == Objects.Base.EffectType.None && x.active == true && x.Viewtype == Objects.Base.ViewType.Default && x.Position.X < Util.Global.Hero.Position.X + drawDistanceWidth && x.Position.Y < Util.Global.Hero.Position.Y + drawDistanceHeight && x.Position.X > Util.Global.Hero.Position.X - drawDistanceWidth && x.Position.Y > Util.Global.Hero.Position.Y - drawDistanceHeight).OrderBy(O => O.orderNum).ToList())
+                foreach (Objects.Sprite2d S in Util.Global.Sprites.Where(x => x.effectType == Objects.Base.EffectType.None && x.active == true && x.Viewtype == Objects.Base.ViewType.Default && Vector2.Distance(x.Position, Util.Global.Hero.Position) < Util.Global.DrawDistance).OrderBy(O => O.orderNum).ToList())
+                {
+                    Color DrawColor = Util.Global.DayColor;
+                    if (Util.Global.DayColor.G < 152)
+                    {
+                        foreach (Tuple<int, int, float> V in Util.Global.Lights)
+                        {
+                            if (Util.Base.collision(S.Position, V.Item3, new Rectangle((int)V.Item1, (int)V.Item2, 70, 70)))
+                            {
+                                DrawColor = Color.LightGray;
+                            }
+                            if (Util.Base.collision(S.Position, V.Item3 / 2f, new Rectangle((int)V.Item1, (int)V.Item2, 70, 70)))
+                            {
+                                DrawColor = Color.White;
+                            }
+                        }
+                    }
+                    if (S.LightIgnor == true)
+                    {
+                        DrawColor = S.color;
+                    }
+                    else if (S.color != Color.White && S.modelname != null)
+                    {
+                        DrawColor = S.color;
+                        if (S.color.R > Util.Global.DayColor.R)
+                        {
+                            DrawColor.R = Util.Global.DayColor.R;
+                        }
+                        if (S.color.G > Util.Global.DayColor.G)
+                        {
+                            DrawColor.G = Util.Global.DayColor.G;
+                        }
+                        if (S.color.B > Util.Global.DayColor.B)
+                        {
+                            DrawColor.B = Util.Global.DayColor.B;
+                        }
+                    }
+                    S.Draw(GraphicsDevice, spriteBatch, DrawColor);
+                    DrawCount++;
+                }
+                spriteBatch.End();
+                Viewport OriVP = GraphicsDevice.Viewport;
+                GraphicsDevice.Viewport = new Viewport(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+                spriteBatch.Begin();
+                foreach (Objects.Sprite2d S in Util.Global.Sprites.Where(x => x.active == true && x.Viewtype == Objects.Base.ViewType.HUD).OrderBy(O => O.orderNum).ToList())
+                {
+                    S.Draw(GraphicsDevice, spriteBatch, S.color);
+                }
+                spriteBatch.End();
+                GraphicsDevice.Viewport = OriVP;
+
+                //Texture2D videoTexture = null;
+                //if (player.State != MediaState.Stopped)
+                //    videoTexture = player.GetTexture();
+                //if (videoTexture != null)
+                //{
+                //    spriteBatch.Draw(videoTexture, new Rectangle(0, 0, 250, 150), Color.White);
+                //}
+                //DrawModel(model, world, view, projection);
+                //System.Diagnostics.Debug.WriteLine("DrawCount:" + DrawCount.ToString());
+                
+                base.Draw(gameTime);
+                Util.Global.graphicsDevice = GraphicsDevice;
+
+                if (Util.Global.ScreenShotFlag)
+                {
+                    Util.Global.ScreenShotFlag = false;
+                    if (!string.IsNullOrEmpty(Util.Global.ScreenShotName))
+                    {
+                        GraphicsDevice.SaveScreenshot(Util.Global.ScreenShotName);
+                        Util.Global.ScreenShotName = "";
+                    }
+                    else
+                    {
+                        GraphicsDevice.SaveScreenshot();
+                    }
+
+                    GraphicsDevice.SetRenderTarget(null);
+                }
             }
-
-            GraphicsDevice.Clear(Color.Black);
-            List<object> AllObjects = new List<object>();
-            AllObjects.AddRange(Util.Global.Sprites);
-            AllObjects.AddRange(Util.Global.Texts);
-            AllObjects.AddRange(Util.Global.Menus);
-            AllObjects.AddRange(Util.Global.SpritesAnim);
-
-            int drawDistance = 1000;
-
-            AllObjects = AllObjects.Where(x => (int)x.GetType().GetProperty("x").GetValue(x, null) < Util.Global.Hero.HeroSprite.x + drawDistance && (int)x.GetType().GetProperty("y").GetValue(x, null) < Util.Global.Hero.HeroSprite.y + drawDistance).ToList();
-            AllObjects = AllObjects.Where(x => (int)x.GetType().GetProperty("x").GetValue(x, null) > Util.Global.Hero.HeroSprite.x - drawDistance && (int)x.GetType().GetProperty("y").GetValue(x, null) > Util.Global.Hero.HeroSprite.y - drawDistance).ToList();
-
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null, Cam.Transform);
-            //spriteBatch.Begin();
-            spriteBatch.Draw(Util.Global.GameBackground.model, new Rectangle(Util.Global.GameBackground.x, Util.Global.GameBackground.y, Util.Global.GameBackground.sizex, Util.Global.GameBackground.sizey), Color.White);
-            foreach (object item in AllObjects.Where(y => (bool)y.GetType().GetProperty("active").GetValue(y,null) == true).OrderBy(x => x.GetType().GetProperty("orderNum").GetValue(x,null)))
+            catch (Exception ex)
             {
-                if (item.GetType() == typeof(Objects.Menu))
-                {
-                    Objects.Menu M = (Objects.Menu)item;
-                    Texture2D MenuItem;
-                    MenuItem = new Texture2D(GraphicsDevice, 1, 1);
-                    MenuItem.SetData(new[] { Color.White });
-                    spriteBatch.Draw(MenuItem, new Rectangle(M.x, M.y, M.boxWidth, M.boxHeight), M.boxColor);
-                    spriteBatch.DrawString(font, M.text, new Vector2(M.x + 15, M.y), M.color);
-                }
-                if (item.GetType() == typeof(Objects.Spite2d))
-                {
-                    Objects.Spite2d S = (Objects.Spite2d)item;
-                    //spriteBatch.Draw(S.model, new Rectangle(S.x, S.y, S.sizex, S.sizey), DayColor);
-                    spriteBatch.Draw(S.model, new Rectangle(S.x, S.y, S.sizex, S.sizey), Color.White);
-                }
-                if (item.GetType() == typeof(Objects.Text))
-                {
-                    Objects.Text T = (Objects.Text)item;
-                    spriteBatch.DrawString(font, T.text, new Vector2(T.x, T.y), T.color, 0f, new Vector2(0, 0), 0.5f, new SpriteEffects(), 1.0f);
-                }
-                if (item.GetType() == typeof(Objects.AnimSprite))
-                {
-                    Objects.AnimSprite A = (Objects.AnimSprite)item;
-                    A.Draw(spriteBatch);
-               }
+                Util.Base.Log("Main Draw Fail: "+ex.Message);
             }
             
-            
-
-            //Texture2D videoTexture = null;
-            //if (player.State != MediaState.Stopped)
-            //    videoTexture = player.GetTexture();
-            //if (videoTexture != null)
-            //{
-            //    spriteBatch.Draw(videoTexture, new Rectangle(0, 0, 250, 150), Color.White);
-            //}
-
-
-            //DrawModel(model, world, view, projection);
-            spriteBatch.End();
-            base.Draw(gameTime);
         }
 
         private void DrawModel(Model model, Matrix world, Matrix view, Matrix projection)
@@ -391,6 +315,16 @@ namespace Game
 
                 mesh.Draw();
             }
+        }
+
+        static Vector2 MoveInCircle(GameTime gameTime, float speed)
+        {
+            double time = gameTime.TotalGameTime.TotalSeconds * speed;
+
+            float x = (float)Math.Cos(time);
+            float y = (float)Math.Sin(time);
+
+            return new Vector2(x, y);
         }
     }
 }

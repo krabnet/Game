@@ -5,51 +5,44 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework;
 
 namespace Game.Objects
 {
-    public class Spite2d : Base
+    [Serializable]
+    public class Sprite2d : Base
     {
-        public Texture2D model { get; set; }
-        public SoundEffect collisionSound { get; set; }
 
-        public Spite2d(Texture2D _model, string _name, bool _active, int _x, int _y, int _sizex, int _sizey, int _speed, ControlType _controlType)
+
+        public Sprite2d(string _model, string _name, bool _active, Vector2 _Position, Vector2 _Size, int _speed, ControlType _controlType)
         {
-            model = _model;
+            modelname = _model;
             name = _name;
             active = _active;
-            x = _x;
-            y = _y;
-            sizex = _sizex;
-            sizey = _sizey;
+            Position = _Position;
+            previousPosition = _Position;
+            Size = _Size;
+            SizeScale = 1;
             speed = _speed;
             allowScroll = false;
+            Viewtype = ViewType.Default;
             controlType = _controlType;
             ID = Guid.NewGuid();
-            actionType = ActionType.Collision;
+            Item = new Objects.Item();
+            Item.Type = Items.Item.ItemType.None;
+            Item.State = Items.Item.ItemState.Null;
+            effectType = EffectType.None;
+            color = Color.White;
+            Orientation = 0F;
+            if (actionCall == null)
+            { actionCall = new List<Actions.ActionCall>(); }
         }
 
-        public Spite2d()
+        public Sprite2d()
         {
             ID = Guid.NewGuid();
-        }
-
-        public void AddSpite2d(Objects.Spite2d _sprite2d)
-        {
-            Util.Global.Sprites.Add(_sprite2d);
-        }
-
-        public void Pickup(Spite2d _Spite2d)
-        {
-            _Spite2d.active = false;
-        }
-
-        public static void FlipMouseControl(Objects.Spite2d Sprite)
-        {
-            if (Sprite.controlType == Objects.Base.ControlType.Mouse)
-            { Sprite.controlType = Objects.Base.ControlType.None; }
-            else
-            { Sprite.controlType = Objects.Base.ControlType.Mouse; }
+            if (actionCall == null)
+            { actionCall = new List<Actions.ActionCall>(); }
         }
     }
 }
