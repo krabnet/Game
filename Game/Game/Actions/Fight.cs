@@ -103,7 +103,7 @@ namespace Game.Actions
         public static void ShowAutoFightButton()
         {
             Util.Global.Sprites.RemoveAll(x => x.name == "AutoAttack");
-            Util.Global.Sprites.Add(new Objects.Sprite2d(null, "AutoAttack", true, new Vector2(10, 100), Util.Global.DefaultPosition, 0, Objects.Base.ControlType.None));
+            Util.Global.Sprites.Add(new Objects.Sprite2d(null, "AutoAttack", true, new Vector2(100, 400), Util.Global.DefaultPosition, 0, Objects.Base.ControlType.None));
             Util.Global.Sprites.Where(x => x.name == "AutoAttack").FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
             Util.Global.Sprites.Where(x => x.name == "AutoAttack").FirstOrDefault().text = "Auto Attack";
             Util.Global.Sprites.Where(x => x.name == "AutoAttack").FirstOrDefault().textSize = 1f;

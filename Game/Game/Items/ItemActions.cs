@@ -38,7 +38,7 @@ namespace Game.Items
                     {
                         Util.Global.Sprites.Where(x => x.ID == Item.ID).FirstOrDefault().LightSourceDistance = Util.Global.TorchLightDistance;
                         Util.Global.Sprites.Where(x => x.ID == Item.ID).FirstOrDefault().Viewtype = Objects.Base.ViewType.Default;
-                        Util.Global.Sprites.Where(x => x.ID == Item.ID).FirstOrDefault().orderNum = 102000;
+                        Util.Global.Sprites.Where(x => x.ID == Item.ID).FirstOrDefault().orderNum = 10981;
                     }
                 //}
             }
@@ -230,7 +230,7 @@ namespace Game.Items
             foreach (System.Collections.Generic.KeyValuePair<Items.Item.ItemType, Items.Item.ItemType> I in ItemList)
             {
                 Objects.Sprite2d SP = Items.Item.GetItemByType(I.Key,new Vector2(0,0));
-                Objects.Sprite2d SP2 = Items.Item.GetItemByType(I.Value, Util.Global.DefaultPosition);
+                
 
                 List<Objects.Sprite2d> spritsintheway = Util.Global.Sprites.Where(l => Util.Base.collision(l, new Rectangle((int)MousePos.X, (int)MousePos.Y, 1, 1)) == true && l.active == true && l.modelname == SP.modelname).OrderByDescending(o => o.orderNum).ToList();
                 if (spritsintheway.Count > 0)
@@ -246,11 +246,20 @@ namespace Game.Items
                             RemoveTile = false;
                             break;
                         default:
-                            Items.ItemActions.AddItemToInventory(Items.Item.GetItemByType(I.Key, new Vector2(0,0)), 1, 1);
+                            if (I.Value == Item.ItemType.None)
+                            {
+                                Util.Global.Sprites.RemoveAll(x => x.ID == spritsintheway.FirstOrDefault().ID);
+                                RemoveTile = false;
+                            }
+                            else
+                            { 
+                                Items.ItemActions.AddItemToInventory(Items.Item.GetItemByType(I.Key, new Vector2(0,0)), 1, 1);
+                            }
                             break;
                     }
-                    if (RemoveTile)
+                    if (RemoveTile && I.Value != Item.ItemType.None)
                     {
+                        Objects.Sprite2d SP2 = Items.Item.GetItemByType(I.Value, Util.Global.DefaultPosition);
                         Util.Global.Sprites.Where(s => s.ID == spritsintheway.FirstOrDefault().ID).FirstOrDefault().modelname = SP2.modelname;
                         Util.Global.Sprites.Where(s => s.ID == spritsintheway.FirstOrDefault().ID).FirstOrDefault().Item.Type = SP2.Item.Type;
                         Util.Global.Sprites.Where(s => s.ID == spritsintheway.FirstOrDefault().ID).FirstOrDefault().clipping = false;

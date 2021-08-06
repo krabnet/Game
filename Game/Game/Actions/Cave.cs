@@ -35,6 +35,7 @@ namespace Game.Actions
                 Util.Global.MainMap[(int)mapVector.X, (int)mapVector.Y, (int)mapVector.Z].Sprite2d.Add(ReturnDoor);
             }
             new Maps.Map().WarpMap(mapVector, Util.Global.CurrentMap);
+            //Make sure there is no Clip in this location
             Util.Global.Sprites.Where(x => x.ID == Util.Global.Hero.ID).FirstOrDefault().Position = Util.Global.Sprites.Where(x => x.name == "CaveExit").FirstOrDefault().Position;
 
 

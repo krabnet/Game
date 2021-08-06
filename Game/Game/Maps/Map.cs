@@ -39,18 +39,20 @@ namespace Game.Maps
                 case Game.Maps.MapData.Biome.Grass:
                     BaseType = Items.Item.ItemType.Grass;
                     AddInitialBase(mapVector, MapSizeH, MapSizeW, BaseType);
-                    if (mapVector == new Vector3(50, 50, 0))
-                        AddMapPart(Game.Maps.MapData.MapPart.start, 45, 45, BaseType);
-
-                    //AddMapPart(Maps.MapData.MapPart.testDebug, 45, 55, BaseType);
-                    //AddMapPart(Maps.MapData.MapPart.town, 1, 1, BaseType);
-
                     AddWarps(mapVector);
                     AddMapParts(mapVector, BaseType, bio);
                     AddRoads(mapVector, BaseType);
                     AddBorder(mapVector, Util.Global.SizeMap, Util.Global.SizeMap, bio);
                     AddDrops(mapVector, bio, BaseType);
                     AddProps(mapVector, BaseType);
+
+                    if (mapVector == new Vector3(50, 50, 0))
+                        AddMapPart(Game.Maps.MapData.MapPart.start, 45, 45, BaseType);
+
+                    //AddMapPart(Maps.MapData.MapPart.testDebug, 45, 55, BaseType);
+                    //AddMapPart(Maps.MapData.MapPart.caveEntrance, 55, 55, BaseType);
+
+
                     AddEnemy(mapVector);
                     break;
                 case Game.Maps.MapData.Biome.Mini:
@@ -59,6 +61,13 @@ namespace Game.Maps
                     AddBorder(mapVector, MapSizeH, MapSizeW, bio);
                     AddTorches(mapVector, MapSizeH, MapSizeW);
                     AddProps(mapVector, Items.Item.ItemType.Grass);
+                    break;
+                case Game.Maps.MapData.Biome.Fish:
+                    BaseType = Items.Item.ItemType.Grass;
+                    AddInitialBase(mapVector, MapSizeH, MapSizeW, BaseType);
+                    //AddBorder(mapVector, MapSizeH, MapSizeW, bio);
+                    //AddTorches(mapVector, MapSizeH, MapSizeW);
+                    //AddProps(mapVector, Items.Item.ItemType.Grass);
                     break;
                 case Game.Maps.MapData.Biome.Shop:
                     BaseType = Items.Item.ItemType.Path;
@@ -99,7 +108,6 @@ namespace Game.Maps
 
             this.Sprite2d = Sprite2d;
             Util.Global.MainMap[(int)mapVector.X, (int)mapVector.Y, (int)mapVector.Z] = this;
-        
         }
 
         private void AddInitialBase(Vector3 mapVector, int MapSizeH, int MapSizeW, Items.Item.ItemType BaseType)
@@ -367,6 +375,24 @@ namespace Game.Maps
             }
         }
 
+        [Obsolete("Old&busted")]
+        public void AddEnemyOLD(Vector3 mapVector)
+        {
+            int MaxEnemyCount = 8;
+            for (int i = 0; i < MaxEnemyCount; i++)
+            {
+                Vector3 Distance = Vector3.Subtract(new Vector3(50, 50, 0), mapVector);
+                int EnemyLevel = (int)Math.Abs(Distance.X) + (int)Math.Abs(Distance.Y);
+                int x = Util.Global.GetRandomInt(3, Util.Global.SizeMap - 5);
+                int y = Util.Global.GetRandomInt(3, Util.Global.SizeMap - 5);
+                Vector2 Pos = Sprite2d.Where(z => z.name == x.ToString() + ":" + y.ToString()).FirstOrDefault().Position;
+                Objects.Sprite2d En = Actions.Enemy.GetEnemyByLevel(Util.Global.GetRandomInt(0,EnemyLevel), Pos);
+                En.name = i.ToString() + "|" + x.ToString() + ":" + y.ToString();
+                Sprite2d.Add(En);
+                Util.Base.Log("MAP Add Enemy:" + En.ID.ToString() + " | " + Pos.X.ToString() + "-" + Pos.Y.ToString());
+            }
+        }
+
         public void AddEnemy(Vector3 mapVector)
         {
             int MaxEnemyCount = 8;
@@ -374,12 +400,25 @@ namespace Game.Maps
             {
                 Vector3 Distance = Vector3.Subtract(new Vector3(50, 50, 0), mapVector);
                 int EnemyLevel = (int)Math.Abs(Distance.X) + (int)Math.Abs(Distance.Y);
-                int x = Util.Global.GetRandomInt(3, Util.Global.SizeMap - 3);
-                int y = Util.Global.GetRandomInt(3, Util.Global.SizeMap - 3);
-                Vector2 Pos = Sprite2d.Where(z => z.name == x.ToString() + ":" + y.ToString()).FirstOrDefault().Position;
-                Objects.Sprite2d En = Actions.Enemy.GetEnemyByLevel(Util.Global.GetRandomInt(0,EnemyLevel), Pos);
-                Sprite2d.Add(En);
-                Util.Base.Log("Add Enemy:" + En.ID.ToString() + " | " + Pos.X.ToString() + "-" + Pos.Y.ToString());
+
+                bool SpawnLoc = true;
+                int x = 0;
+                int y = 0;
+                while (SpawnLoc)
+                {
+                    x = Util.Global.GetRandomInt(3, Util.Global.SizeMap - 8);
+                    y = Util.Global.GetRandomInt(3, Util.Global.SizeMap - 8);
+                    Objects.Sprite2d Tile = this.Sprite2d.Where(z => z.name == x.ToString() + ":" + y.ToString()).FirstOrDefault();
+                    if (Tile!=null && Tile.modelname == "grass0")
+                    {
+                        SpawnLoc = false;
+                    }
+                }
+                Vector2 Pos = this.Sprite2d.Where(z => z.name == x.ToString() + ":" + y.ToString()).FirstOrDefault().Position;
+                Objects.Sprite2d En = Actions.Enemy.GetEnemyByLevel(Util.Global.GetRandomInt(0, EnemyLevel), Pos);
+                En.name = i.ToString() + "|" + x.ToString() + ":" + y.ToString();
+                this.Sprite2d.Add(En);
+                Util.Base.Log("Spawn Enemy:" + En.ID.ToString() + " | " + Pos.X.ToString() + "-" + Pos.Y.ToString());
             }
         }
 
@@ -407,30 +446,45 @@ namespace Game.Maps
 
         public void AddMapPart(Game.Maps.MapData.MapPart MP, int StartX, int StartY, Items.Item.ItemType BaseType)
         {
+            Util.Base.Log("AddMapPart:"+MP.ToString() + "|" + StartX.ToString() + ":" + StartY.ToString());
+
             int tilex = StartX;
             int tiley = StartY;
             Items.Item.ItemType[, ,] Map = MapData.GetMapByPart(MP);
             int columncount = 0;
+
             foreach (Items.Item.ItemType TT in Map)
             {
                 string TileName = string.Format("{0}:{1}", tilex.ToString(), tiley.ToString());
-                if (Sprite2d.Where(x => x.name == TileName).FirstOrDefault() != null && Sprite2d.Where(x => x.name == TileName).FirstOrDefault().Item.Type == BaseType)
+                Objects.Sprite2d OriTile = Sprite2d.Where(x => x.name == TileName).FirstOrDefault();
+
+                if ((OriTile != null && Sprite2d.Where(x => x.name == TileName).FirstOrDefault().Item.Type == BaseType) || MP == MapData.MapPart.caveEntrance || MP == MapData.MapPart.start)
                 {
-                    Objects.Sprite2d OriTile = Sprite2d.Where(x => x.name == TileName).FirstOrDefault();
+                    Sprite2d.RemoveAll(x => x.name == OriTile.name);
+
+                    //if (MP == MapData.MapPart.caveEntrance)
+                    //{
+                    //    Sprite2d.RemoveAll(x => x.name == OriTile.name);
+                    //}
+                    //else
+                    //{
+                    //    Sprite2d.RemoveAll(x => x.ID == OriTile.ID);
+                    //}
+
                     Objects.Sprite2d NewTile = Items.Item.GetItemByType(TT, OriTile.Position);
+                    NewTile.name = TileName;
+
                     if (NewTile.Item.BackGroundType != null)
                     {
                         Objects.Sprite2d BG = Items.Item.GetItemByType((Items.Item.ItemType)NewTile.Item.BackGroundType, OriTile.Position);
                         BG.name = TileName;
                         BG.orderNum = 1;
                         Sprite2d.Add(BG);
+                        //Util.Base.Log("AddTileBG:" + BG.modelname + ":" + BG.name);
                     }
-                    NewTile.name = TileName;
-                    //NewTile.orderNum = 1;
-                    Sprite2d.RemoveAll(x => x.ID == OriTile.ID);
                     Sprite2d.Add(NewTile);
+                    //Util.Base.Log("AddTile:" + NewTile.modelname + ":" + NewTile.name);
 
-                    
                 }
                 columncount++;
                 tiley++;
@@ -494,6 +548,13 @@ namespace Game.Maps
                 Util.Global.Hero.Position = Util.Global.PreviousMapPosition;
             }
 
+            if (Util.Global.Hero.ClipCheck())
+            {
+                Util.Base.Log("Warped Hero to Clip!");
+                //We got a Problem!
+            }
+
+
             foreach (Objects.Sprite2d S in Util.Global.Pets)
             {
                 Objects.Sprite2d X = Util.Global.Sprites.Where(x => x.ID == S.ID).FirstOrDefault();
@@ -556,7 +617,10 @@ namespace Game.Maps
                 Util.Base.Log(InHand.Position.ToString());
                 Util.Global.Sprites.Where(x => x.ID == InHand.ID).FirstOrDefault().Position = Util.GameMouse.GetTrueMousePosition(Objects.Base.ViewType.Default);
             }
-            
+
+            Util.Global.FullScreenSize = new Vector2(Util.Global.MainMap[(int)mapVector.X, (int)mapVector.Y, (int)mapVector.Z].Sprite2d.Max(x => x.Position.X), Util.Global.MainMap[(int)mapVector.X, (int)mapVector.Y, (int)mapVector.Z].Sprite2d.Max(x => x.Position.Y));
+            Util.Base.Log("ScreenSize:" + Util.Global.FullScreenSize.X.ToString() + "," + Util.Global.FullScreenSize.Y.ToString());
+
             Util.Global.MainMap[(int)Util.Global.CurrentMap.X, (int)Util.Global.CurrentMap.Y, (int)Util.Global.CurrentMap.Z].Sprite2d = CurrentState;
             Util.Global.CurrentMap = mapVector;
         }

@@ -11,11 +11,6 @@ namespace Game.Actions
     public static class Anim
     {
 
-        public static void AnimTest()
-        {
-            //AnimTest1();
-        }
-
         public static void firefly()
         {
             int size = 3;
@@ -58,11 +53,11 @@ namespace Game.Actions
             {
                 rnd = new Random();
                 size = Util.Global.GetRandomInt(50, 75);
-                Util.Global.Sprites.Add(new Objects.Sprite2d("smoke", "smoke" + i.ToString(), true, new Vector2(600, 400), new Vector2(size, size), 10, Objects.Base.ControlType.None));
+                Util.Global.Sprites.Add(new Objects.Sprite2d("smoke", "smoke" + i.ToString(), true, Util.Global.Hero.Position, new Vector2(size, size), 10, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == "smoke" + i.ToString()).FirstOrDefault().orderNum = 1000;
                 Util.Global.Sprites.Where(x => x.name == "smoke" + i.ToString()).FirstOrDefault().LightIgnor = true;
-                List<Vector2> MOV =Actions.Anim.GetMovementRandom(new Vector2(700, 400), Util.Global.GetRandomInt(10, 100));
-                Util.Global.Sprites.Where(x => x.name == "smoke" + i.ToString()).FirstOrDefault().Maneuver = new Objects.Maneuver(new Vector2(600, 400), new Vector2(size, size),MOV, Util.ColorType.GreyScale, false);
+                List<Vector2> MOV =Actions.Anim.GetMovementRandom(Util.Global.Hero.Position, Util.Global.GetRandomInt(10, 100));
+                Util.Global.Sprites.Where(x => x.name == "smoke" + i.ToString()).FirstOrDefault().Maneuver = new Objects.Maneuver(Util.Global.Hero.Position, new Vector2(size, size),MOV, Util.ColorType.GreyScale, false);
                 Util.Global.Sprites.Where(x => x.name == "smoke" + i.ToString()).FirstOrDefault().Maneuver.MovementSize = Util.Sizes.GetSizeList(Util.SizeType.Random, new Vector2(size, size), MOV.Count, 5,3,3);
             }
         }
@@ -72,11 +67,11 @@ namespace Game.Actions
         {
             int i = 1;
             int size = 25;
-            Util.Global.Sprites.Add(new Objects.Sprite2d("ball", "ball" + i.ToString(), true, Util.Global.DefaultPosition, new Vector2(size, size), 10, Objects.Base.ControlType.None));
+            Util.Global.Sprites.Add(new Objects.Sprite2d("ball", "ball" + i.ToString(), true, Util.Global.Hero.Position, new Vector2(size, size), 10, Objects.Base.ControlType.None));
             Util.Global.Sprites.Where(x => x.name == "ball" + i.ToString()).FirstOrDefault().orderNum = 1000;
             Util.Global.Sprites.Where(x => x.name == "ball" + i.ToString()).FirstOrDefault().LightIgnor = true;
-            List<Vector2> MOV = Actions.Anim.GetMovement(Util.Global.DefaultPosition, new Vector2(800, 400), 120);
-            Util.Global.Sprites.Where(x => x.name == "ball" + i.ToString()).FirstOrDefault().Maneuver = new Objects.Maneuver(Util.Global.DefaultPosition, new Vector2(size, size),MOV, Util.ColorType.Random, false);
+            List<Vector2> MOV = Actions.Anim.GetMovement(Util.Global.Hero.Position, new Vector2(800, 400), 120);
+            Util.Global.Sprites.Where(x => x.name == "ball" + i.ToString()).FirstOrDefault().Maneuver = new Objects.Maneuver(Util.Global.Hero.Position, new Vector2(size, size),MOV, Util.ColorType.Random, false);
             Util.Global.Sprites.Where(x => x.name == "ball" + i.ToString()).FirstOrDefault().Maneuver.MovementSize = Util.Sizes.GetSizeList(Util.SizeType.Grow, new Vector2(size, size), MOV.Count, 1,100,100);
         }
 
@@ -86,14 +81,17 @@ namespace Game.Actions
             int size = 5;
             for (int i = 1; i <= 50; i++)
             {
-                Util.Global.Sprites.Add(new Objects.Sprite2d("drop", "drop" + i.ToString(), true, Util.Global.DefaultPosition, new Vector2(size, size), 10, Objects.Base.ControlType.None));
+                Util.Global.Sprites.Add(new Objects.Sprite2d("drop", "drop" + i.ToString(), true, Util.Global.Hero.Position, new Vector2(size, size), 10, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == "drop" + i.ToString()).FirstOrDefault().orderNum = 1000;
                 Util.Global.Sprites.Where(x => x.name == "drop" + i.ToString()).FirstOrDefault().LightIgnor = true;
-                Vector2 start = new Vector2(Util.Global.GetRandomInt(200, 210), Util.Global.GetRandomInt(200, 210));
-                Vector2 end = new Vector2(Util.Global.GetRandomInt(195, 215), Util.Global.GetRandomInt(0, 50));
+                Vector2 start = Microsoft.Xna.Framework.Vector2.Add(Util.Global.Hero.Position, new Vector2(Util.Global.GetRandomInt(10, 15), Util.Global.GetRandomInt(-10, 5)));
+                Vector2 end = Microsoft.Xna.Framework.Vector2.Subtract(Util.Global.Hero.Position, new Vector2(Util.Global.GetRandomInt(-70, 50), Util.Global.GetRandomInt(75, 150)));
+
+                //Vector2 start = new Vector2(Util.Global.GetRandomInt(200, 210), Util.Global.GetRandomInt(200, 210));
+                //Vector2 end = new Vector2(Util.Global.GetRandomInt(195, 215), Util.Global.GetRandomInt(0, 50));
                 List<Vector2> MOV = Actions.Anim.GetMovement(start, end, Util.Global.GetRandomInt(10, 50));
                 MOV.AddRange(GetMovementRandom(end,20));
-                Util.Global.Sprites.Where(x => x.name == "drop" + i.ToString()).FirstOrDefault().Maneuver = new Objects.Maneuver(Util.Global.DefaultPosition, new Vector2(size, size),MOV, Util.ColorType.Random, false);
+                Util.Global.Sprites.Where(x => x.name == "drop" + i.ToString()).FirstOrDefault().Maneuver = new Objects.Maneuver(Util.Global.Hero.Position, new Vector2(size, size),MOV, Util.ColorType.Random, false);
             }
         }
 
@@ -128,33 +126,9 @@ namespace Game.Actions
         }
         
         //rain
-        public static void AnimTest4()
+        public static void RainAnim()
         {
             Util.Global.Sprites.AddRange(Util.Global.RainDrops);
-            //List<Objects.Sprite2d> drops = new List<Objects.Sprite2d>();
-            //for (int i = 1; i <= 100; i++)
-            //{
-            //    Vector2 Position = Util.Global.DefaultPosition;
-            //    Vector2 Size = new Vector2(Util.Global.GetRandomInt(1, 3), Util.Global.GetRandomInt(5, 15));
-
-            //    Objects.Sprite2d drop = new Objects.Sprite2d("drop", "drop" + i.ToString(), true, Position, Size, 10, Objects.Base.ControlType.None);
-            //    drop.orderNum=1000;
-            //    drop.LightIgnor = true;
-                
-            //    Vector2 start = new Vector2(Util.Global.GetRandomInt(0, 1000), Util.Global.GetRandomInt(-200, -100));
-            //    Vector2 end = new Vector2(Util.Global.GetRandomInt(-100, (int)start.X - 100), Util.Global.GetRandomInt(700, 800));
-            //    List<Vector2> MOV = Actions.Anim.GetMovement(start, end, Util.Global.GetRandomInt(10, 75));
-            //    drop.Maneuver = new Objects.Maneuver(Position, Size, MOV, Util.ColorType.BlueScale, true);
-
-            //    List<object> Obj1 = new List<object>();
-            //    Obj1.Add(drop);
-            //    drop.Maneuver.FinalActionCall = new ActionCall(ActionType.Update, typeof(Objects.Maneuver), "ReplaceRainDropMov", Obj1);
-                
-            //    new Objects.Maneuver().ReplaceRainDropMov(Util.Global.Sprites.Where(x => x.name == "drop" + i.ToString()).FirstOrDefault());
-
-            //    drops.Add(drop);
-            //}
-            //Util.Global.Sprites.AddRange(drops);
         }
 
         //Cyclone
@@ -180,9 +154,9 @@ namespace Game.Actions
             }
         }
 
-        public static void AnimTest6()
+        public static void AnimTest6() //snow
         {
-            for (int i = 1; i <= 150; i++)
+            for (int i = 1; i <= 20; i++)
             {
                 Vector2 Position = Util.Global.DefaultPosition;
                 Vector2 Size = new Vector2(Util.Global.GetRandomInt(3, 7), Util.Global.GetRandomInt(3, 7));

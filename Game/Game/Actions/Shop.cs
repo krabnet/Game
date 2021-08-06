@@ -199,6 +199,8 @@ namespace Game.Actions
             ValidShopItems.Add(Items.Item.ItemType.PotionSpeed);
             ValidShopItems.Add(Items.Item.ItemType.BerryStrength);
             ValidShopItems.Add(Items.Item.ItemType.PotionStrength);
+            ValidShopItems.Add(Items.Item.ItemType.BerryDexterity);
+            ValidShopItems.Add(Items.Item.ItemType.PotionDexterity);
             ValidShopItems.Add(Items.Item.ItemType.Oil);
             ValidShopItems.Add(Items.Item.ItemType.Log);
             ValidShopItems.Add(Items.Item.ItemType.IronBar);

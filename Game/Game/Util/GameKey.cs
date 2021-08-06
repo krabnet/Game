@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Game.Util
 {
@@ -18,7 +19,7 @@ namespace Game.Util
             {
                 Util.Sys.Load();
             }
-            if (state.IsKeyDown(Keys.F4))
+            if (state.IsKeyDown(Keys.F4) && !Util.Global.PreviousKeyboardState.IsKeyDown(Keys.F4))
             {
                 Actions.Season.MoveToNextSeason();
             }
@@ -28,9 +29,15 @@ namespace Game.Util
                 Util.Global.Weather = Actions.Enviro.Weather.Snow;
                 Actions.Season.CheckWeather();
             }
-            if (state.IsKeyDown(Keys.F6))
+            if (state.IsKeyDown(Keys.F6) && !Util.Global.PreviousKeyboardState.IsKeyDown(Keys.F6))
             {
-                Actions.Anim.AnimTest5();
+                //Actions.Anim.AnimTest5();
+                Actions.Fishing.GoFish();
+            }
+
+            if (state.IsKeyDown(Keys.F7) && !Util.Global.PreviousKeyboardState.IsKeyDown(Keys.F7))
+            {
+                Util.Global.ContentMan.Load<SoundEffect>("Sounds/bubbles").Play();
             }
 
             if (state.IsKeyDown(Keys.F9) && !Util.Global.PreviousKeyboardState.IsKeyDown(Keys.F9))

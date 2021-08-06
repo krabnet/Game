@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace Game.Actions
 {
-    public enum ActionType { Collision, Mouse, MouseRight, MouseAny, MouseCollision, Update, Item };
+    public enum ActionType { Collision, Mouse, MouseRight, MouseAny, MouseCollision, Update, Item, FishCollision };
 
     [Serializable]
     public class ActionCall

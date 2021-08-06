@@ -19,8 +19,8 @@ namespace Game.Items
             TestChest, Spawner,
             None, Grass, Wall, Wall2, Plank, Floor, Door, Gravel, Water, Rock, Sand, Path, Glass, Lava, Fence,
             BuildWall, BuildFence, 
-            Coin, Chest, ChestLoot, Torch, SpotLight, Log, Bread, Oil, Health, Fountain, Bed, Cloth,
-            Pickaxe, Hammer, Axe, Shovel,  
+            Coin, Chest, ChestLoot, Torch, SpotLight, Log, Bread, Fish, Oil, Health, Bed, Cloth,
+            Pickaxe, Hammer, Axe, Shovel, FishPoll,
             Totem, CaveEntrance, Ladder,
             Caldron, WorkBench, Anvil, Tent, Shop, Stove, WarpPad, WarpPadOn, GreenHouse,
             IronBar, IronOre, SilverBar, SilverOre, GoldBar, GoldOre,
@@ -30,6 +30,7 @@ namespace Game.Items
             SeedStrength, GardenStrength, BerryStrength, PotionStrength,
             SeedSpeed, GardenSpeed, BerrySpeed, PotionSpeed,
             SeedDexterity, GardenDexterity, BerryDexterity, PotionDexterity,
+            FountainSpeed, FountainHealth,
             Bush, Bush2, RockSmall, Flower, Flower2, 
             Shelf1, Rug1, Rug2, ClayPot, ClayPot2, ClayPot3, Barrel, Chair, HayStack
         };
@@ -186,8 +187,20 @@ namespace Game.Items
                     ActionObjects = new List<object>();
                     ItemList = new Dictionary<ItemType, ItemType>();
                     ItemList.Add(ItemType.Sand, ItemType.Grass);
+                    ItemList.Add(ItemType.Flower, ItemType.None);
+                    ItemList.Add(ItemType.Flower2, ItemType.None);
+                    ItemList.Add(ItemType.Bush, ItemType.None);
+                    ItemList.Add(ItemType.Bush2, ItemType.None);
+                    ItemList.Add(ItemType.RockSmall, ItemType.None);
                     ActionObjects.Add(ItemList);
                     ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Item, typeof(Items.ItemActions), "PickupTile", ActionObjects));
+                    break;
+
+                case Item.ItemType.FishPoll:
+                    ReturnSprite = GetItemSprite("FishPole", IT, Position);
+                    ReturnSprite.Item.Description = "Fish Cathcer";
+                    ReturnSprite.Item.Stack = false;
+                    ActionObjects.Add(ReturnSprite);
                     break;
 
                 case Item.ItemType.Stove:
@@ -436,7 +449,7 @@ namespace Game.Items
                         ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.MouseRight, typeof(Items.ItemActions), "PickupItem", ActionObjects));
                         ActionObjects = new List<object>();
                         ActionObjects.Add(ReturnSprite);
-                        ActionObjects.Add(Item.ItemType.GardenSpeed);
+                        ActionObjects.Add(Item.ItemType.GardenDexterity);
                         ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Mouse, typeof(Items.ItemActions), "AddSapling", ActionObjects));
                         break;
 
@@ -452,7 +465,7 @@ namespace Game.Items
                         ReturnSprite.clipping = false;
                         ReturnSprite.SpriteType = Objects.Base.Type.Tile;
                         ActionObjects.Add(ReturnSprite);
-                        ActionObjects.Add(ItemType.BerrySpeed);
+                        ActionObjects.Add(ItemType.BerryDexterity);
                         ReturnSprite.AnimSprite.ActionCallEOF = new Actions.ActionCall(Actions.ActionType.Item, typeof(Items.ItemActions), "GardenUpdate", ActionObjects);
                         break;
 
@@ -741,10 +754,11 @@ namespace Game.Items
                     ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Mouse, typeof(Items.ItemActions), "FlipClip", ActionObjects));
                     break;
 
-                case ItemType.Fountain:
+                case ItemType.FountainSpeed:
                     ReturnSprite = Items.Item.GetItemSprite("waterfountain", IT, Position);
                     ReturnSprite.Item.BackGroundType = ItemType.Grass;
                     ReturnSprite.speed = 5;
+                    ReturnSprite.color = Color.Green;
                     ReturnSprite.Size = new Vector2(64, 64);
                     ReturnSprite.AnimSprite = new Objects.AnimSprite(5, 6);
                     ReturnSprite.AnimSprite.action = false;
@@ -757,10 +771,28 @@ namespace Game.Items
                     ActionObjects.Add(5);
                     ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Collision, typeof(Actions.Buff), "AddBuff", ActionObjects));
                     break;
+
+                case ItemType.FountainHealth:
+                    ReturnSprite = Items.Item.GetItemSprite("waterfountain", IT, Position);
+                    ReturnSprite.Item.BackGroundType = ItemType.Grass;
+                    ReturnSprite.speed = 5;
+                    ReturnSprite.color = Color.Red;
+                    ReturnSprite.Size = new Vector2(64, 64);
+                    ReturnSprite.AnimSprite = new Objects.AnimSprite(5, 6);
+                    ReturnSprite.AnimSprite.action = false;
+                    ReturnSprite.AnimSprite.StopOnEof = false;
+                    ActionObjects.Add(ReturnSprite);
+                    ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Update, typeof(Items.ItemActions), "ProximityAnimAction", ActionObjects));
+                    ActionObjects = new List<object>();
+                    ActionObjects.Add(Util.Global.Hero);
+                    ActionObjects.Add(Actions.Buff.BuffType.Health);
+                    ActionObjects.Add(5);
+                    ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Collision, typeof(Actions.Buff), "AddBuff", ActionObjects));
+                    break;
                 #endregion
-                 
+
                 #region items
-                 case Item.ItemType.Ladder:
+                case Item.ItemType.Ladder:
                     ReturnSprite = GetItemSprite("CaveEntrance", IT, Position);
                     ReturnSprite.Item.Description = "Going Up?";
                     ReturnSprite.Size = new Vector2(600, 402) / 6;
@@ -800,7 +832,22 @@ namespace Game.Items
                     ActionObjects.Add(ReturnSprite);
                     ActionObjects.Add(Util.Global.Hero);
                     ActionObjects.Add(Actions.Buff.BuffType.Feeding);
-                    ActionObjects.Add(1);
+                    ActionObjects.Add(100);
+                    ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Item, typeof(Items.ItemActions), "ConsumeItemObjectAndBuff", ActionObjects));
+                    ActionObjects = new List<object>();
+                    ActionObjects.Add(ReturnSprite);
+                    ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.MouseRight, typeof(Items.ItemActions), "PickupItem", ActionObjects));
+                    break;
+
+                case Item.ItemType.Fish:
+                    ReturnSprite = GetItemSprite("fish", IT, Position);
+                    ReturnSprite.Item.Description = "Eat me";
+                    ReturnSprite.color = Color.Green;
+                    ActionObjects = new List<object>();
+                    ActionObjects.Add(ReturnSprite);
+                    ActionObjects.Add(Util.Global.Hero);
+                    ActionObjects.Add(Actions.Buff.BuffType.Feeding);
+                    ActionObjects.Add(100);
                     ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Item, typeof(Items.ItemActions), "ConsumeItemObjectAndBuff", ActionObjects));
                     ActionObjects = new List<object>();
                     ActionObjects.Add(ReturnSprite);
@@ -925,6 +972,8 @@ namespace Game.Items
                     ReturnSprite.Item.BackGroundType = ItemType.Floor;
                     ReturnSprite.Inventory = new List<Objects.Item>();
                     ReturnSprite.Inventory.Add(GetItemByType(ItemType.Hammer, Util.Global.DefaultPosition).Item);
+                    ReturnSprite.Inventory.Add(GetItemByType(ItemType.Pickaxe, Util.Global.DefaultPosition).Item);
+                    ReturnSprite.Inventory.Add(GetItemByType(ItemType.Torch, Util.Global.DefaultPosition).Item);
                     ReturnSprite.Inventory.Add(GetItemByType(ItemType.PotionSpeed, Util.Global.DefaultPosition).Item);
                     ReturnSprite.Inventory.Add(GetItemByType(ItemType.PotionStrength, Util.Global.DefaultPosition).Item);
                     ReturnSprite.Inventory.Add(GetItemByType(ItemType.PotionDexterity, Util.Global.DefaultPosition).Item);
@@ -962,7 +1011,7 @@ namespace Game.Items
                     ActionObjects.Add(IT);
                     ActionObjects.Add(Util.Global.Hero);
                     ActionObjects.Add(Actions.Buff.BuffType.Speed);
-                    ActionObjects.Add(30);
+                    ActionObjects.Add(60);
                     ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Item, typeof(Items.ItemActions), "ConsumeItemAndBuff", ActionObjects));
                     ActionObjects = new List<object>();
                     ActionObjects.Add(ReturnSprite);
@@ -977,7 +1026,7 @@ namespace Game.Items
                     ActionObjects.Add(IT);
                     ActionObjects.Add(Util.Global.Hero);
                     ActionObjects.Add(Actions.Buff.BuffType.Strength);
-                    ActionObjects.Add(30);
+                    ActionObjects.Add(60);
                     ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Item, typeof(Items.ItemActions), "ConsumeItemAndBuff", ActionObjects));
                     ActionObjects = new List<object>();
                     ActionObjects.Add(ReturnSprite);
@@ -992,7 +1041,7 @@ namespace Game.Items
                     ActionObjects.Add(IT);
                     ActionObjects.Add(Util.Global.Hero);
                     ActionObjects.Add(Actions.Buff.BuffType.Dexterity);
-                    ActionObjects.Add(30);
+                    ActionObjects.Add(60);
                     ReturnSprite.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Item, typeof(Items.ItemActions), "ConsumeItemAndBuff", ActionObjects));
                     ActionObjects = new List<object>();
                     ActionObjects.Add(ReturnSprite);

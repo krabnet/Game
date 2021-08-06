@@ -207,6 +207,12 @@ namespace Game
                 spriteBatch.End();
 
 
+
+                
+
+
+
+
                 //GraphicsDevice.PrepareScreenShot();
                 spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null, Util.Global.Cam.Transform);
                 //Util.Global.ScreenShotRender = new RenderTarget2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
@@ -256,6 +262,8 @@ namespace Game
                     DrawCount++;
                 }
                 spriteBatch.End();
+
+                //------------------------------
                 Viewport OriVP = GraphicsDevice.Viewport;
                 GraphicsDevice.Viewport = new Viewport(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
                 spriteBatch.Begin();
@@ -265,6 +273,7 @@ namespace Game
                 }
                 spriteBatch.End();
                 GraphicsDevice.Viewport = OriVP;
+                //------------------------------
 
                 //Texture2D videoTexture = null;
                 //if (player.State != MediaState.Stopped)
@@ -275,7 +284,7 @@ namespace Game
                 //}
                 //DrawModel(model, world, view, projection);
                 //System.Diagnostics.Debug.WriteLine("DrawCount:" + DrawCount.ToString());
-                
+
                 base.Draw(gameTime);
                 Util.Global.graphicsDevice = GraphicsDevice;
 

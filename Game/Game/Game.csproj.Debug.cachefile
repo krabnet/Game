@@ -220,6 +220,12 @@ Content\Wildlife.xnb
 Content\Effect\ripple.xnb
 Content\Font\SpriteFont1.xnb
 Content\Slides\heroup.xnb
+Content\Images\Item\heart.xnb
+Content\Images\Tile\sky.xnb
+Content\Music\gone_fishin.xnb
+Content\Images\Prop\fish.xnb
+Content\Sounds\bubbles.xnb
+Content\Images\Item\FishPole.xnb
 Content\Music\town.wma
 Content\Music\fight.wma
 Content\Music\explore.wma
@@ -231,3 +237,4 @@ Content\Music\shop.wma
 Content\Music\musicauniversalis.wma
 Content\Music\FantasyOrchestralTheme.wma
 Content\Wildlife.wmv
+Content\Music\gone_fishin.wma

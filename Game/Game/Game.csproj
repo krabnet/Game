@@ -131,6 +131,7 @@
     <Compile Include="Actions\Crafting.cs" />
     <Compile Include="Actions\Enviro.cs" />
     <Compile Include="Actions\Fight.cs" />
+    <Compile Include="Actions\Fishing.cs" />
     <Compile Include="Actions\PetAbility.cs" />
     <Compile Include="Actions\Progress.cs" />
     <Compile Include="Actions\Say.cs" />

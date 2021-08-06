@@ -42,6 +42,7 @@ namespace Game.Util
             new Util.Asset().PopulateContent(Util.Global.ContentMan);
             initHero();
             Util.Global.MainMap = new Maps.Map[100, 100, 100];
+            Util.Global.FullScreenSize = new Vector2(1000, 1000);
             Util.Global.GameMouseTime = 0;
             Actions.Fight.init();
             Util.Global.UpdateClock = 100;
@@ -54,7 +55,7 @@ namespace Game.Util
             new Maps.Map().LoadMapByInt((int)Util.Global.StartLocation.X, (int)Util.Global.StartLocation.Y, (int)Util.Global.StartLocation.Z);
             Actions.Season.GetMusic();
             Actions.Season.GetMusicBackGround();
-            //Smap.AddMapPart(Maps.MapPart.mountain, 7, 7);
+            //Smap.AddMapPart(Maps.MapData.MapPart.caveEntrance, 7, 7, Items.Item.ItemType.None);
             //new Maps.Map().LoadMapByInt(99, 99, 98);
             //new Maps.Map().GenerateMapPartMap(Maps.MapPart.start);
             Vector2 DefaultPosition = new Vector2(-1000, -1000);
@@ -64,7 +65,7 @@ namespace Game.Util
             Items.ItemActions.AddItemToInventory(Items.Item.GetItemByType(Items.Item.ItemType.BerryHealth, Util.Global.DefaultPosition), 5, 1);
             Items.ItemActions.AddItemToInventory(Items.Item.GetItemByType(Items.Item.ItemType.BerryStrength, Util.Global.DefaultPosition), 5, 1);
             Items.ItemActions.AddItemToInventory(Items.Item.GetItemByType(Items.Item.ItemType.Coin, Util.Global.DefaultPosition), 10, 1);
-            Items.ItemActions.AddItemToInventory(Items.Item.GetItemByType(Items.Item.ItemType.Bread, Util.Global.DefaultPosition), 1, 1);
+            Items.ItemActions.AddItemToInventory(Items.Item.GetItemByType(Items.Item.ItemType.Bread, Util.Global.DefaultPosition), 2, 1);
 
             //Items.ItemActions.AddItemToInventory(Items.Item.GetItemByType(Items.Item.ItemType.Glass, Util.Global.DefaultPosition), 10, 1);
             Items.ItemActions.AddItemToInventory(Items.Item.GetItemByType(Items.Item.ItemType.Hammer, Util.Global.DefaultPosition), 1, 1);

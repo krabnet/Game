@@ -178,6 +178,14 @@ namespace Game.Actions
             R = new Recipie();
             R.Active = true;
             R.ResultNum = 2;
+            R.Result = Items.Item.ItemType.SeedDexterity;
+            R.ItemCost = new Dictionary<Items.Item.ItemType, int>();
+            R.ItemCost.Add(Items.Item.ItemType.BerryDexterity, 1);
+            RR.Add(R);
+
+            R = new Recipie();
+            R.Active = true;
+            R.ResultNum = 2;
             R.Result = Items.Item.ItemType.SeedTree;
             R.ItemCost = new Dictionary<Items.Item.ItemType, int>();
             R.ItemCost.Add(Items.Item.ItemType.Log, 1);

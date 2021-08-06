@@ -9,8 +9,8 @@ namespace Game.Maps
     {
         public static Items.Item.ItemType[, ,] Get()
         {
-            int Width = Util.Global.GetRandomInt(30, 50);
-            int Height = Util.Global.GetRandomInt(30, 50);
+            int Width = Util.Global.GetRandomInt(20, 40);
+            int Height = Util.Global.GetRandomInt(20, 40);
 
             Items.Item.ItemType[, ,] Room = new Items.Item.ItemType[1, Width + 1, Height + 1];
 

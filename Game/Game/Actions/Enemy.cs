@@ -15,6 +15,8 @@ namespace Game.Actions
 
         public static void SpawnEnemy()
         {
+            if (!Util.Global.Fighting)
+            {
                 Vector3 Distance = Vector3.Subtract(new Vector3(50, 50, 0), Util.Global.CurrentMap);
                 int EnemyLevel = (int)Math.Abs(Distance.X) + (int)Math.Abs(Distance.Y);
 
@@ -34,7 +36,8 @@ namespace Game.Actions
                 Vector2 Pos = Util.Global.Sprites.Where(z => z.name == x.ToString() + ":" + y.ToString()).FirstOrDefault().Position;
                 Objects.Sprite2d En = Actions.Enemy.GetEnemyByLevel(EnemyLevel, Pos);
                 Util.Global.Sprites.Add(En);
-                Util.Base.Log("Add Enemy:" + En.ID.ToString() + " | " + Pos.X.ToString() + "-" + Pos.Y.ToString());
+                Util.Base.Log("Spawn Enemy:" + En.ID.ToString() + " | " + Pos.X.ToString() + "-" + Pos.Y.ToString());
+            }
         }
 
         public static void SpawnEnemy(Vector2 Pos)
@@ -43,7 +46,7 @@ namespace Game.Actions
             int EnemyLevel = (int)Math.Abs(Distance.X) + (int)Math.Abs(Distance.Y);
             Objects.Sprite2d En = Actions.Enemy.GetEnemyByLevel(EnemyLevel, Pos);
             Util.Global.Sprites.Add(En);
-            Util.Base.Log("Add Enemy:" + En.ID.ToString() + " | " + Pos.X.ToString() + "-" + Pos.Y.ToString());
+            Util.Base.Log("Spawn Enemy Loc:" + En.ID.ToString() + " | " + Pos.X.ToString() + "-" + Pos.Y.ToString());
         }
 
         public static Objects.Sprite2d GetEnemyByLevel(int level, Vector2 Position)

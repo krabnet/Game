@@ -20,6 +20,8 @@ namespace Game.Objects
         public bool Repeat { get; set; }
         public bool ReturnToOriginalPosition { get; set; }
         public Game.Actions.ActionCall FinalActionCall { get; set; }
+        public bool Draw { get; set; }
+
 
         public Maneuver()
         { }

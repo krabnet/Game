@@ -27,16 +27,19 @@ namespace Game.Menu
 
                 Vector2 pos = new Vector2(5, 10);
 
+                Util.Global.Sprites.RemoveAll(x => x.name == "SeasonIcon");
                 Util.Global.Sprites.Add(new Objects.Sprite2d("SpringIcon", "SeasonIcon", true, pos, new Vector2(345 / 9, 346 / 9), 0, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == "SeasonIcon").FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
 
                         pos = Vector2.Add(pos, new Vector2((345 / 9) + 3, 0));
                 
                 string name = "HealthHudTotal";
+                Util.Global.Sprites.RemoveAll(x => x.name == name);
                 Util.Global.Sprites.Add(new Objects.Sprite2d("drop", name, true, pos, new Vector2(50, 12), 10, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
 
                 name = "HealthHudTotalText";
+                Util.Global.Sprites.RemoveAll(x => x.name == name);
                 Util.Global.Sprites.Add(new Objects.Sprite2d(null, name, true, Vector2.Add(pos,new Vector2(0, 0)), new Vector2(10, 10), 0, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().text = Util.Global.Hero.Actor.Health.ToString() + "/" + Util.Global.Hero.Actor.HealthMax.ToString();
@@ -46,6 +49,7 @@ namespace Game.Menu
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().boxColor = Color.Transparent;
 
                 name = "HealthHud";
+                Util.Global.Sprites.RemoveAll(x => x.name == name);
                 Util.Global.Sprites.Add(new Objects.Sprite2d("drop", name, true, Vector2.Subtract(pos, new Vector2(1, 0)), new Vector2(1, 8), 5, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().color = Color.Red;
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
@@ -54,10 +58,12 @@ namespace Game.Menu
                         pos = Vector2.Add(pos, new Vector2(0, 15));
 
                 name = "HungerHudTotal";
+                Util.Global.Sprites.RemoveAll(x => x.name == name);
                 Util.Global.Sprites.Add(new Objects.Sprite2d("drop", name, true, pos, new Vector2(50, 12), 10, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
 
                 name = "HungerHudTotalText";
+                Util.Global.Sprites.RemoveAll(x => x.name == name);
                 Util.Global.Sprites.Add(new Objects.Sprite2d(null, name, true, Vector2.Add(pos, new Vector2(0, 0)), new Vector2(10, 10), 0, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().text = Util.Global.Hero.Actor.Hunger.ToString() + "/" + Util.Global.Hero.Actor.HungerMax.ToString();
@@ -67,6 +73,7 @@ namespace Game.Menu
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().boxColor = Color.Transparent;
 
                 name = "HungerHud";
+                Util.Global.Sprites.RemoveAll(x => x.name == name);
                 Util.Global.Sprites.Add(new Objects.Sprite2d("drop", name, true, Vector2.Subtract(pos, new Vector2(1, 0)), new Vector2(1, 8), 5, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().color = Color.Brown;
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
@@ -76,6 +83,7 @@ namespace Game.Menu
 
 
                 name = "DayHud";
+                Util.Global.Sprites.RemoveAll(x => x.name == name);
                 Util.Global.Sprites.Add(new Objects.Sprite2d(null, name, true, Vector2.Add(pos, new Vector2(0, 0)), new Vector2(10, 10), 0, Objects.Base.ControlType.None));
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
                 Util.Global.Sprites.Where(x => x.name == name).FirstOrDefault().text = Util.Global.GameClockDay.ToString();

@@ -33,6 +33,9 @@ namespace Game.Actions
                 case BuffType.Dexterity:
                     ReturnSprite = GetBuffSprite("dexterity");
                     break;
+                case BuffType.Health:
+                    ReturnSprite = GetBuffSprite("heart");
+                    break;
             }
             return ReturnSprite;
         }
@@ -49,6 +52,8 @@ namespace Game.Actions
 
         public static void AddBuff(Objects.Sprite2d Actor, BuffType T, int Duration)
         {
+
+
             if (Util.Global.Sprites.Where(x => x.ID == Actor.ID).FirstOrDefault().Actor.Buffs.Where(x => x == T).Count() == 0)
             {
                 Util.Global.Sprites.Where(x => x.ID == Actor.ID).FirstOrDefault().Actor.Buffs.Add(T);
@@ -63,10 +68,11 @@ namespace Game.Actions
                         Util.Global.Sprites.Where(x => x.ID == Actor.ID).FirstOrDefault().Actor.Hunger = NewHunger;
                         obj1.Add(Actor);
                         obj1.Add(T);
-                         
-                        AE.Duration = Duration;
-                        AE.InitialDuration = Duration;
-                        Util.Global.ActionEvents.Add(AE);
+                        AE.actionCall.Add(new ActionCall(ActionType.Item, typeof(Buff), "RemoveBuff", obj1));
+                        Util.Global.Sprites.Where(x => x.ID == Actor.ID).FirstOrDefault().Actor.Buffs.Remove(T);
+                        //AE.Duration = Duration;
+                        //AE.InitialDuration = Duration;
+                        //Util.Global.ActionEvents.Add(AE);
                         break;
                     case BuffType.Speed:
                         Util.Global.Sprites.Where(x => x.ID == Actor.ID).FirstOrDefault().speed += 2;
@@ -128,8 +134,8 @@ namespace Game.Actions
                 Objects.Sprite2d AddBuff = GetBuffByType(T);
                 AddBuff.name = Name;
                 Util.Global.Sprites.Add(AddBuff);
-                List<Vector2> MOV = Actions.Anim.GetMovementCyclone(Actor.Position, 350);
-                Util.Global.Sprites.Where(x => x.name == Name).FirstOrDefault().Maneuver = new Objects.Maneuver(Actor.Position, new Vector2(25, 25), MOV, Util.ColorType.Random, false);
+                List<Vector2> MOV = Actions.Anim.GetMovementCyclone(Actor.Position, 750);
+                Util.Global.Sprites.Where(x => x.name == Name).FirstOrDefault().Maneuver = new Objects.Maneuver(Actor.Position, new Vector2(35, 35), MOV, Util.ColorType.Random, false);
                 Util.Global.Sprites.Where(x => x.name == Name).FirstOrDefault().Maneuver.MovementSize = null;
             }
 

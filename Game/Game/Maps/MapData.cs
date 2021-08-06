@@ -10,7 +10,7 @@ namespace Game.Maps
     {
 
     public enum MapPart { caveEntrance, field, forrest, lavapond, mountain, pond, ridge, river, room, spawner, start, testDebug, totem, vein, volcano, town}
-    public enum Biome { Grass, Mini, Cave, Shop, Stable }
+    public enum Biome { Grass, Mini, Cave, Shop, Stable, Fish }
 
     public static List<MapItems> GameMapItems { get; set; }
     public static List<MapMapParts> GameMapParts { get; set; }
@@ -46,6 +46,8 @@ namespace Game.Maps
         int Level = (int)Math.Abs(Distance.X) + (int)Math.Abs(Distance.Y);
         List<MapMapParts> MPs = GameMapParts.Where(x => Level >= x.minLevel && x.biomes.Contains(Bio)).ToList();
         return MPs.OrderBy(x => Guid.NewGuid()).FirstOrDefault().mapPart;
+        //TODO: Implement Chance of MapPart.
+
     }
 
     static string UppercaseFirst(string s)
@@ -169,7 +171,7 @@ namespace Game.Maps
             MI.chance = Util.Global.GetRandomFloat(.0001F, .001F); MI.minLevel = 0; MI.biomes = B; GameMapItems.Add(MI);
 
             MI = new MapItems(); MI.itemType = Items.Item.ItemType.IronOre;
-            B = new List<Biome>(); B.Add(Biome.Grass);
+            B = new List<Biome>(); B.Add(Biome.Grass); B.Add(Biome.Cave);
             MI.chance = Util.Global.GetRandomFloat(.0001F, .001F); MI.minLevel = 0; MI.biomes = B; GameMapItems.Add(MI);
 
             MI = new MapItems(); MI.itemType = Items.Item.ItemType.CaveEntrance;
@@ -188,7 +190,11 @@ namespace Game.Maps
             B = new List<Biome>(); B.Add(Biome.Grass);
             MI.chance = .0002F; MI.minLevel = 2; MI.biomes = B; GameMapItems.Add(MI);
 
-            MI = new MapItems(); MI.itemType = Items.Item.ItemType.Fountain;
+            MI = new MapItems(); MI.itemType = Items.Item.ItemType.FountainSpeed;
+            B = new List<Biome>(); B.Add(Biome.Grass);
+            MI.chance = .0001F; MI.minLevel = 3; MI.biomes = B; GameMapItems.Add(MI);
+
+            MI = new MapItems(); MI.itemType = Items.Item.ItemType.FountainHealth;
             B = new List<Biome>(); B.Add(Biome.Grass);
             MI.chance = .0001F; MI.minLevel = 3; MI.biomes = B; GameMapItems.Add(MI);
 

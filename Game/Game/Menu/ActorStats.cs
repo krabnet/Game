@@ -30,7 +30,7 @@ namespace Game.Menu
                 SP.orderNum = 500;
                 Util.Global.Sprites.Add(SP);
 
-                SP = new Objects.Sprite2d(null, Name + "text", true, new Vector2(5, 10), new Vector2(100, 400), 0, Objects.Base.ControlType.None);
+                SP = new Objects.Sprite2d(null, Name + "text", true, new Vector2(5, 60), new Vector2(100, 400), 0, Objects.Base.ControlType.None);
                 SP.Viewtype = Objects.Base.ViewType.HUD;
                 SP.boxColor = Color.Transparent;
                 SP.textSize = 1f;
@@ -41,7 +41,7 @@ namespace Game.Menu
 
                 if (Actor.Actor.actorType != Objects.Actor.ActorType.Hero)
                 {
-                    SP = new Objects.Sprite2d(Actor.modelname, Name + "image", true, new Vector2(5, 125), Actor.Size, 0, Objects.Base.ControlType.None);
+                    SP = new Objects.Sprite2d(Actor.modelname, Name + "image", true, new Vector2(60, 110), Actor.Size, 0, Objects.Base.ControlType.None);
                     SP.Viewtype = Objects.Base.ViewType.HUD;
                     SP.orderNum = 501;
                     SP.boxColor = Color.White;
@@ -49,7 +49,7 @@ namespace Game.Menu
                 }
                 else
                 {
-                    SP = new Objects.Sprite2d("Hero", Name + "image", true, new Vector2(5, 125), Actor.Size, 0, Objects.Base.ControlType.None);
+                    SP = new Objects.Sprite2d("Hero", Name + "image", true, new Vector2(60, 110), Actor.Size, 0, Objects.Base.ControlType.None);
                     SP.Viewtype = Objects.Base.ViewType.HUD;
                     SP.orderNum = 501;
                     SP.boxColor = Color.White;
@@ -82,6 +82,8 @@ namespace Game.Menu
             {
                 HUD.RemoveMainStat();
                 Stat = Stat + "Name:  " + Actor.Actor.enemyType.ToString() + "\n";
+                Stat = Stat + "Name2:  " + Actor.name.ToString() + "\n";
+                //Stat = Stat + "POS:  " + Actor.Position.X.ToString() + ":" + Actor.Position.Y.ToString() + "\n";
             }
 
             Stat = Stat + "Dex:  " + Actor.Actor.Dex.ToString() + "\n";
@@ -141,7 +143,7 @@ namespace Game.Menu
         private static void ShowCloseButton(Objects.Sprite2d Actor)
         {
             Util.Global.Sprites.RemoveAll(x => x.name == "CloseStats");
-            Util.Global.Sprites.Add(new Objects.Sprite2d(null, "CloseStats", true, new Vector2(135, 5), new Vector2(10, 10), 0, Objects.Base.ControlType.None));
+            Util.Global.Sprites.Add(new Objects.Sprite2d(null, "CloseStats", true, new Vector2(135, 60), new Vector2(10, 10), 0, Objects.Base.ControlType.None));
             Util.Global.Sprites.Where(x => x.name == "CloseStats").FirstOrDefault().Viewtype = Objects.Base.ViewType.HUD;
             Util.Global.Sprites.Where(x => x.name == "CloseStats").FirstOrDefault().text = "X";
             Util.Global.Sprites.Where(x => x.name == "CloseStats").FirstOrDefault().textSize = 1f;

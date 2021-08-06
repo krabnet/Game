@@ -15,6 +15,7 @@ namespace Game.Objects
         private const float Hysteresis = 15.0f;
         private const float ChaseDistance = 250.0f;
         private const float CaughtDistance = 30.0f;
+        private const float TurnSpeed = 0.20f;
 
         public AiState aiState { get; set; }
         public float Orientation { get; set; }
@@ -41,6 +42,8 @@ namespace Game.Objects
         public int EndMax { get; set; }
         public int Agl { get; set; }
         public int AglMax { get; set; }
+        
+        public int ClipCount { get; set; }
 
         public void CalculateStats()
         {
@@ -57,6 +60,7 @@ namespace Game.Objects
             DexMax = Dex;
             EndMax = End;
             AglMax = Agl;
+            ClipCount = 0;
         }
 
         public void Update(Sprite2d sprite)
@@ -124,7 +128,7 @@ namespace Game.Objects
                 else if (pet.Actor.aiState == AiState.Wander || pet.Actor.aiState == AiState.Stabled)
                 {
                     currentSpeed = .25f * 10;
-                    Wander(pet, Position, pet.Actor.WanderDirection, pet.Orientation, 0.10f);
+                    Wander(pet, Position, pet.Actor.WanderDirection, pet.Orientation, TurnSpeed);
                     
                     if (distanceFromHero < 150f && pet.Actor.aiState == AiState.Stabled)
                     {
@@ -169,7 +173,7 @@ namespace Game.Objects
                 Vector2 Position = enemy.Position;
                 if (enemy.Actor.aiState == AiState.Wander)
                 {
-                    Wander(enemy, Position, enemy.Actor.WanderDirection, enemy.Orientation, 0.10f);
+                    Wander(enemy, Position, enemy.Actor.WanderDirection, enemy.Orientation, TurnSpeed);
                     ChaseThreshold -= Hysteresis / 2;
                 }
                 else if (enemy.Actor.aiState == AiState.Chasing)
@@ -222,12 +226,33 @@ namespace Game.Objects
 
                 if (enemy.ClipCheck())
                 {
+                    enemy.Actor.ClipCount++; 
                     enemy.Position = enemy.Actor.OriginalPosition;
-                    enemy.Orientation = enemy.Orientation * -1.5f;
+                    //enemy.Orientation = enemy.Orientation * -1.5f;
+                    enemy.Orientation = enemy.Orientation * (Util.Global.GetRandomFloat(-1.5f,1.5f));
+                    enemy.Actor.WanderDirection = Vector2.Multiply(enemy.Actor.WanderDirection, new Vector2(Util.Global.GetRandomInt(-2, 2), Util.Global.GetRandomInt(-2, 2)));
+
+                    if (enemy.Actor.ClipCount > 50)
+                    { 
+                       enemy.Actor.OriginalPosition = Vector2.Add(enemy.Actor.OriginalPosition, new Vector2(-1, -0.5f));
+                       enemy.Actor.WanderDirection = enemy.Actor.WanderDirection * -1;
+                       enemy.Actor.Orientation = Util.Global.GetRandomFloat(-1, 1);
+                       Wander(enemy, enemy.Actor.OriginalPosition, enemy.Actor.WanderDirection, enemy.Actor.Orientation, 10);
+                    }
+
+
+                    if (enemy.Position.X <= 1 || enemy.Position.Y <= 1)
+                    { enemy.Position = new Vector2(Util.Global.GetRandomInt(35,100), Util.Global.GetRandomInt(35, 100));
+                        enemy.Orientation = Util.Global.GetRandomFloat(-1, 1);
+                        enemy.Actor.WanderDirection = new Vector2(Util.Global.GetRandomFloat(-1, 1), Util.Global.GetRandomFloat(-1, 1));
+                        Wander(enemy, enemy.Actor.OriginalPosition, enemy.Actor.WanderDirection, enemy.Actor.Orientation, 10);
+                    }
                 }
                 else
                 {
                     enemy.Actor.OriginalPosition = enemy.Position;
+                    enemy.Actor.ClipCount = 0;
+
                 }
 
                 //List<Object> Objs2 = new List<object>();
@@ -312,8 +337,8 @@ namespace Game.Objects
             // behavior is. Larger numbers will make the characters "wobble" more,
             // smaller numbers will make them more stable. we want just enough
             // wobbliness to be interesting without looking odd.
-            wanderDirection.X += MathHelper.Lerp(-.35f, .35f, (float)Util.Global.GetRandomDouble());
-            wanderDirection.Y += MathHelper.Lerp(-.35f, .35f, (float)Util.Global.GetRandomDouble());
+            wanderDirection.X += MathHelper.Lerp(-.35f, .55f, Util.Global.GetRandomFloat(0,1));
+            wanderDirection.Y += MathHelper.Lerp(-.35f, .55f, Util.Global.GetRandomFloat(0,1));
             //wanderDirection.X += MathHelper.Lerp((float)Util.Global.GetRandomDouble()*-1, (float)Util.Global.GetRandomDouble(), (float)Util.Global.GetRandomDouble());
             //wanderDirection.Y += MathHelper.Lerp((float)Util.Global.GetRandomDouble()*-1, (float)Util.Global.GetRandomDouble(), (float)Util.Global.GetRandomDouble());
 
@@ -325,17 +350,23 @@ namespace Game.Objects
             // ... and then turn to face in the wander direction. We don't turn at the
             // maximum turning speed, but at 15% of it. Again, this is a bit of a magic
             // number: it works well for this sample, but feel free to tweak it.
-            orientation = TurnToFace(position, position + wanderDirection, orientation,
-                .15f * turnSpeed);
+            orientation = TurnToFace(position, position + wanderDirection, orientation,.15f * turnSpeed);
 
 
             // next, we'll turn the characters back towards the center of the screen, to
             // prevent them from getting stuck on the edges of the screen.
             Vector2 screenCenter = Vector2.Zero;
-            //screenCenter.X = Util.Global.Cam.Pos.X;
-            //screenCenter.Y = Util.Global.Cam.Pos.Y;
-            screenCenter.X = Util.Global.Sprites.Max(x => x.Position.X) / 2;
-            screenCenter.Y = Util.Global.Sprites.Max(x => x.Position.Y) / 2; ;
+            //float CamX = Util.Global.Cam.Pos.X;
+            //float CamY = Util.Global.Cam.Pos.Y;
+
+            //float TileX = Util.Global.Sprites.Where(y => y.name.Contains(":")).ToList().Max(x => x.Position.X) / 2;
+            //float TileY = Util.Global.Sprites.Where(y => y.name.Contains(":")).ToList().Max(x => x.Position.Y) / 2;
+
+            //screenCenter.X = Util.Global.Sprites.Max(x => x.Position.X) / 2;
+            //screenCenter.Y = Util.Global.Sprites.Max(x => x.Position.Y) / 2;
+
+            screenCenter.X = Util.Global.FullScreenSize.X / 2;
+            screenCenter.Y = Util.Global.FullScreenSize.Y / 2;
 
             // Here we are creating a curve that we can apply to the turnSpeed. This
             // curve will make it so that if we are close to the center of the screen,
@@ -352,14 +383,16 @@ namespace Game.Objects
 
             float normalizedDistance = distanceFromScreenCenter / MaxDistanceFromScreenCenter;
 
-            float turnToCenterSpeed = .3f * normalizedDistance * normalizedDistance * turnSpeed;
+            float turnToCenterSpeed = .2f * normalizedDistance * normalizedDistance * turnSpeed;
 
             // once we've calculated how much we want to turn towards the center, we can
             // use the TurnToFace function to actually do the work.
             orientation = TurnToFace(position, screenCenter, orientation, turnToCenterSpeed);
 
+            
             enemy.Orientation = orientation;
             enemy.Actor.WanderDirection = wanderDirection;
+            
         }
     }
 }

@@ -170,7 +170,7 @@ namespace Game.Actions
                         Actions.Anim.AnimTest6();
                         break;
                     case Enviro.Weather.Rain:
-                        Actions.Anim.AnimTest4();
+                        Actions.Anim.RainAnim();
                         break;
                 }
             }
@@ -181,13 +181,13 @@ namespace Game.Actions
         {
             if (Util.Global.Season == Enviro.SeasonType.WinterEarly || Util.Global.Season == Enviro.SeasonType.Winter || Util.Global.Season == Enviro.SeasonType.WinterLate)
             {
-                if (Util.Global.GetRandomInt(0, 100) < 20 && Util.Global.Weather == Enviro.Weather.Clear)
+                if (Util.Global.GetRandomInt(0, 100) < 25 && Util.Global.Weather == Enviro.Weather.Clear)
                 {
                     Util.Global.Weather = Enviro.Weather.Snow;
                     Actions.Anim.AnimTest6();
                     GetMusicBackGround();
                 }
-                if (Util.Global.GetRandomInt(0, 100) > 80 && Util.Global.Weather == Enviro.Weather.Snow)
+                if (Util.Global.GetRandomInt(0, 100) > 85 && Util.Global.Weather == Enviro.Weather.Snow)
                 {
                     Util.Global.Weather = Enviro.Weather.Clear;
                     new Objects.Maneuver().RemoveAll();
@@ -196,13 +196,13 @@ namespace Game.Actions
             }
             else
             {
-                if (Util.Global.GetRandomInt(0, 100) < 20 && Util.Global.Weather == Enviro.Weather.Clear)
+                if (Util.Global.GetRandomInt(0, 100) < 25 && Util.Global.Weather == Enviro.Weather.Clear)
                 {
                     Util.Global.Weather = Enviro.Weather.Rain;
-                    Actions.Anim.AnimTest4();
+                    Actions.Anim.RainAnim();
                     GetMusicBackGround();
                 }
-                if (Util.Global.GetRandomInt(0, 100) > 80 && Util.Global.Weather == Enviro.Weather.Rain)
+                if (Util.Global.GetRandomInt(0, 100) > 85 && Util.Global.Weather == Enviro.Weather.Rain)
                 {
                     Util.Global.Weather = Enviro.Weather.Clear;
                     new Objects.Maneuver().RemoveAll();
@@ -378,6 +378,9 @@ namespace Game.Actions
 
                 if (Util.Global.Sprites.Where(x => x.name == "ShopExit").Count() > 0)
                     Util.Global.Music = Util.Global.ContentMan.Load<Song>("Music/Shop");
+
+                if (Util.Global.Sprites.Where(x => x.name == "FishExit").Count() > 0)
+                    Util.Global.Music = Util.Global.ContentMan.Load<Song>("Music/gone_fishin");
 
                 Util.Global.MusicChange = true;
             }

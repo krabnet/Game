@@ -18,7 +18,7 @@ namespace Game.Maps
             {
                 for (int h = 0; h <= Height; h++)
                 {
-                    if ((i == 0 || h == 0 || i == Width || h == Height) && Util.Global.GetRandomInt(0, 10) < 5)
+                    if ((i == 0 || h == 0 || i == Width || h == Height) && Util.Global.GetRandomInt(0, 10) < 2)
                         Room[0, i, h] = Items.Item.ItemType.Wall;
                     else
                         Room[0, i, h] = Items.Item.ItemType.Wall;

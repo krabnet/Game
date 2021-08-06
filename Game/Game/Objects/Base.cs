@@ -111,103 +111,171 @@ namespace Game.Objects
 
         public void Update(KeyboardState state, GameTime gameTime)
         {
-            if (Util.Global.UpdateClockPreviousMili != gameTime.TotalGameTime.Milliseconds)
+            try
             {
-                Util.Global.UpdateClockPreviousMili = gameTime.TotalGameTime.Milliseconds;
-                Util.Global.UpdateClock++;
-                if (Util.Global.UpdateClock >= 1000)
+
+                if (Util.Global.UpdateClockPreviousMili != gameTime.TotalGameTime.Milliseconds)
                 {
-                    Util.Global.UpdateClock = 0;
-                }
-            }
-
-            if (Util.Global.UpdateClock % 4 == 0 && Actor != null)
-            {
-                Sprite2d S = Util.Global.Sprites.Where(x => x.ID == ID).FirstOrDefault();
-                if (S != null)
-                {
-                    Actor.Update(S);
-                }
-
-                if (AnimSprite != null && (state.IsKeyDown(Keys.W) || state.IsKeyDown(Keys.A) || state.IsKeyDown(Keys.S) || state.IsKeyDown(Keys.D)))
-                { AnimSprite.Update(); }
-
-            }
-
-            if (AnimSprite != null && Actor == null && Util.Global.UpdateClock % speed == 0)
-            {
-                AnimSprite.Update();
-            }
-
-            if (speed > 0 && Util.Global.UpdateClock % speed == 0)
-            {
-                foreach (Actions.ActionCall AC in actionCall.Where(x => x.ActionType == Actions.ActionType.Update).ToList())
-                {
-                    Util.Base.CallMethodByString(AC.Type, AC.actionMethodName, AC.parameters);
-                }
-            }
-
-            if (Util.Global.UpdateClock % 4 == 0 && Maneuver != null && Maneuver.Movement.Count > 0)
-            {
-                Position = new Vector2(Maneuver.Movement[Maneuver.MoveNum].X, Maneuver.Movement[Maneuver.MoveNum].Y);
-                if (Maneuver.MovementSize != null)
-                {
-                    Size = new Vector2(Maneuver.MovementSize[Maneuver.MoveNum].X, Maneuver.MovementSize[Maneuver.MoveNum].Y);
-                }
-                if (Maneuver.ColorType != Util.ColorType.None)
-                { color = Util.Colors.GetColor(Maneuver.ColorType); }
-
-                Maneuver.MoveNum++;
-                if (Maneuver.MoveNum >= Maneuver.Movement.Count)
-                {
-                    if (Maneuver.FinalActionCall != null)
+                    Util.Global.UpdateClockPreviousMili = gameTime.TotalGameTime.Milliseconds;
+                    Util.Global.UpdateClock++;
+                    if (Util.Global.UpdateClock >= 1000)
                     {
-                        Util.Base.CallMethod(Maneuver.FinalActionCall);
+                        Util.Global.UpdateClock = 0;
                     }
-                    if (!Maneuver.Repeat)
+                }
+
+                if (Util.Global.UpdateClock % 4 == 0 && Actor != null)
+                {
+                    Sprite2d S = Util.Global.Sprites.Where(x => x.ID == ID).FirstOrDefault();
+                    if (S != null)
                     {
-                        if (Maneuver.ReturnToOriginalPosition)
+                        Actor.Update(S);
+                    }
+
+                    if (AnimSprite != null && (state.IsKeyDown(Keys.W) || state.IsKeyDown(Keys.A) || state.IsKeyDown(Keys.S) || state.IsKeyDown(Keys.D)))
+                    { AnimSprite.Update(); }
+
+                }
+
+                if (AnimSprite != null && Actor == null && Util.Global.UpdateClock % speed == 0)
+                {
+                    AnimSprite.Update();
+                }
+
+                if (speed > 0 && Util.Global.UpdateClock % speed == 0)
+                {
+                    foreach (Actions.ActionCall AC in actionCall.Where(x => x.ActionType == Actions.ActionType.Update).ToList())
+                    {
+                        Util.Base.CallMethodByString(AC.Type, AC.actionMethodName, AC.parameters);
+                    }
+                }
+
+                if (speed > 0 && Util.Global.UpdateClock % speed == 0 && Maneuver != null && Maneuver.Movement.Count > 0 && Maneuver.Draw)
+                {
+                    Vector2 NewPosition = new Vector2(Maneuver.Movement[Maneuver.MoveNum].X, Maneuver.Movement[Maneuver.MoveNum].Y);
+                    Objects.Sprite2d AddDraw = new Sprite2d(modelname, name, active, NewPosition, Size, 0, (ControlType)controlType);
+                    AddDraw.color = color;
+                    Util.Global.Sprites.Add(AddDraw);
+
+
+                    if (Maneuver.MovementSize != null)
+                    {
+                        Size = new Vector2(Maneuver.MovementSize[Maneuver.MoveNum].X, Maneuver.MovementSize[Maneuver.MoveNum].Y);
+                    }
+                    if (Maneuver.ColorType != Util.ColorType.None)
+                    { color = Util.Colors.GetColor(Maneuver.ColorType); }
+
+                    Maneuver.MoveNum++;
+                    if (Maneuver.MoveNum >= Maneuver.Movement.Count)
+                    {
+                        if (Maneuver.FinalActionCall != null)
                         {
-                            Position = Maneuver.OriginalVector;
-                            Size = Maneuver.OriginalSize;
+                            Util.Base.CallMethod(Maneuver.FinalActionCall);
                         }
-                        Maneuver = null;
-                        if (Actor == null)
+                        if (!Maneuver.Repeat)
                         {
-                            active = false;
-                            Util.Global.Sprites.RemoveAll(x => x.ID == ID);
+                            if (Maneuver.ReturnToOriginalPosition)
+                            {
+                                Position = Maneuver.OriginalVector;
+                                Size = Maneuver.OriginalSize;
+                            }
+                            Maneuver = null;
+                            if (Actor == null)
+                            {
+                                active = false;
+                                Util.Global.Sprites.RemoveAll(x => x.ID == ID);
+                            }
                         }
-                    }
-                    else
-                    {
-                        Maneuver.MoveNum = 0;
+                        else
+                        {
+                            Maneuver.MoveNum = 0;
+                        }
                     }
                 }
-            }
-            if (!Util.Global.Fighting)
-            {
-                if (controlType == Objects.Base.ControlType.Keyboard)
-                { KeyInput(state); }
-            }
 
-            if (ID != Util.Global.Hero.ID && !Util.Global.Fighting && active == true)
-            {
-                foreach (Actions.ActionCall AC in actionCall.Where(x => x.ActionType == Actions.ActionType.Collision).ToList())
+                if (Util.Global.UpdateClock % 4 == 0 && Maneuver != null && Maneuver.Movement.Count > 0 && !Maneuver.Draw)
                 {
-                    if (Util.Base.collision(Util.Global.Hero, new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y)))
+                    Position = new Vector2(Maneuver.Movement[Maneuver.MoveNum].X, Maneuver.Movement[Maneuver.MoveNum].Y);
+                    if (Maneuver.MovementSize != null)
+                    {
+                        Size = new Vector2(Maneuver.MovementSize[Maneuver.MoveNum].X, Maneuver.MovementSize[Maneuver.MoveNum].Y);
+                    }
+                    if (Maneuver.ColorType != Util.ColorType.None)
+                    { color = Util.Colors.GetColor(Maneuver.ColorType); }
+
+                    Maneuver.MoveNum++;
+                    if (Maneuver.MoveNum >= Maneuver.Movement.Count)
+                    {
+                        if (Maneuver.FinalActionCall != null)
+                        {
+                            Util.Base.CallMethod(Maneuver.FinalActionCall);
+                        }
+                        if (!Maneuver.Repeat)
+                        {
+                            if (Maneuver.ReturnToOriginalPosition)
+                            {
+                                Position = Maneuver.OriginalVector;
+                                Size = Maneuver.OriginalSize;
+                            }
+                            Maneuver = null;
+                            if (Actor == null)
+                            {
+                                active = false;
+                                Util.Global.Sprites.RemoveAll(x => x.ID == ID);
+                            }
+                        }
+                        else
+                        {
+                            Maneuver.MoveNum = 0;
+                        }
+                    }
+                }
+                if (!Util.Global.Fighting)
+                {
+                    if (controlType == Objects.Base.ControlType.Keyboard)
+                    { KeyInput(state); }
+                }
+
+                if (ID != Util.Global.Hero.ID && !Util.Global.Fighting && active == true)
+                {
+                    foreach (Actions.ActionCall AC in actionCall.Where(x => x.ActionType == Actions.ActionType.Collision).ToList())
+                    {
+                        if (Util.Base.collision(Util.Global.Hero, new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y)))
+                        {
+                            Util.Base.CallMethodByString(AC.Type, AC.actionMethodName, AC.parameters);
+                        }
+                    }
+                }
+
+                if (name == "fish")
+                {
+                    List<Sprite2d> fishlines = Util.Global.Sprites.Where(x => x.name == "FishLine").ToList();
+
+                    foreach (Actions.ActionCall AC in actionCall.Where(x => x.ActionType == Actions.ActionType.FishCollision).ToList())
+                    {
+                        foreach (Sprite2d S in fishlines)
+                        {
+                            if (Util.Base.collision(S, new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y)))
+                            {
+                                Util.Base.CallMethodByString(AC.Type, AC.actionMethodName, AC.parameters);
+                            }
+                        }
+                    }
+                }
+
+
+                foreach (Actions.ActionCall AC in actionCall.Where(x => x.ActionType == Actions.ActionType.MouseCollision).ToList())
+                {
+                    Vector2 MousePos = Util.GameMouse.GetTrueMousePosition(ViewType.HUD);
+                    if (Util.Base.collision(new Rectangle((int)MousePos.X, (int)MousePos.Y, 10, 10), new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y)))
                     {
                         Util.Base.CallMethodByString(AC.Type, AC.actionMethodName, AC.parameters);
                     }
                 }
             }
-
-            foreach (Actions.ActionCall AC in actionCall.Where(x => x.ActionType == Actions.ActionType.MouseCollision).ToList())
+            catch (Exception ex)
             {
-                Vector2 MousePos = Util.GameMouse.GetTrueMousePosition(ViewType.HUD);
-                if (Util.Base.collision(new Rectangle((int)MousePos.X, (int)MousePos.Y, 10, 10), new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y)))
-                {
-                    Util.Base.CallMethodByString(AC.Type, AC.actionMethodName, AC.parameters);
-                }
+                Util.Base.Log("Update Failure: " + ex.Message);
             }
         }
 
@@ -331,7 +399,10 @@ namespace Game.Objects
                         collideflag = true;
                     }
                 }
+                
+
             }
+            //return false;
             return collideflag;
         }
     }

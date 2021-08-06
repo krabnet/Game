@@ -86,6 +86,7 @@ namespace Game.Util
         public static Vector2 PreviousMapPosition { get; set; }
         public static Random rnd { get; set; }
 
+        public static Vector2 FullScreenSize { get; set; }
         public static Vector3 CavePreviousMap { get; set; }
         public static Vector2 CavePreviousHeroLocation { get; set; }
 
