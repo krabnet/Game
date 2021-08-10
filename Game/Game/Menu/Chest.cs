@@ -15,7 +15,7 @@ namespace Game.Menu
             ActorStats.RemoveAllStats();
             if (Util.Global.Sprites.Where(x => x.Item != null && x.Item.State == Items.Item.ItemState.Hand).Count() == 0)
            {
-               Say.speak(Util.Global.Hero.ID, "Looky Looky! \nSomething shiney!");
+               //Say.speak(Util.Global.Hero.ID, "Looky Looky! \nSomething shiney!");
 
                 HideChest();
                 Util.Global.Chest = ChestItem;

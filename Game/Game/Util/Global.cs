@@ -68,6 +68,11 @@ namespace Game.Util
         public static Objects.Sprite2d GameFightBackground { get; set; }
         public static Vector3 FightPreviousMap { get; set; }
         public static Vector2 FightPreviousHeroLocation { get; set; }
+
+        public static Vector3 DungeonPreviousMap { get; set; }
+        public static Vector2 DungeonPreviousHeroLocation { get; set; }
+
+
         public static List<Guid> Combatants { get; set; }
         public static int FightTurn { get; set; }
 

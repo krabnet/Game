@@ -291,7 +291,7 @@ namespace Game.Actions
                     {
                         Actions.Anim.AnimTest7();
                     }
-                    else if (!Util.Global.Fighting && Util.Global.Weather == Enviro.Weather.Clear && (Enviro.GetTime() == Enviro.TimeName.Dusk || Enviro.GetTime() == Enviro.TimeName.Night))
+                    else if (!Util.Global.Fighting && Util.Global.Weather == Enviro.Weather.Clear && !Enviro.InCave() && (Enviro.GetTime() == Enviro.TimeName.Dusk || Enviro.GetTime() == Enviro.TimeName.Night))
                     {
                         for (int i = 0; i < Util.Global.GetRandomInt(2,12); i++)
                         {
@@ -381,6 +381,12 @@ namespace Game.Actions
 
                 if (Util.Global.Sprites.Where(x => x.name == "FishExit").Count() > 0)
                     Util.Global.Music = Util.Global.ContentMan.Load<Song>("Music/gone_fishin");
+
+                if (Util.Global.Sprites.Where(x => x.name == "DungeonExit").Count() > 0)
+                {
+                    values = Enum.GetValues(typeof(Enviro.DarkMusic));
+                    Util.Global.Music = Util.Global.ContentMan.Load<Song>("Music/" + values.GetValue(Util.Global.GetRandomInt(0, values.Length)).ToString());
+                }
 
                 Util.Global.MusicChange = true;
             }

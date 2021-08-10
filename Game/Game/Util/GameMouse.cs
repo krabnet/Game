@@ -37,7 +37,7 @@ namespace Game.Util
         public static void MouseClick(MouseState ms)
         {
            bool allowaction = true;
-            List<Objects.Sprite2d> MouseObjects = Util.Global.Sprites.Where(x => x.actionCall.Count() > 0).OrderByDescending(y => y.orderNum).ToList();
+            List<Objects.Sprite2d> MouseObjects = Util.Global.Sprites.Where(x => x.actionCall.Count() > 0 && x.active==true).OrderByDescending(y => y.orderNum).ToList();
            foreach(Objects.Sprite2d S in MouseObjects)
            {
                if (allowaction)

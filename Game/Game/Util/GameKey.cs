@@ -37,7 +37,7 @@ namespace Game.Util
 
             if (state.IsKeyDown(Keys.F7) && !Util.Global.PreviousKeyboardState.IsKeyDown(Keys.F7))
             {
-                Util.Global.ContentMan.Load<SoundEffect>("Sounds/bubbles").Play();
+                Maps.Dungeon.WarpDungeon();
             }
 
             if (state.IsKeyDown(Keys.F9) && !Util.Global.PreviousKeyboardState.IsKeyDown(Keys.F9))

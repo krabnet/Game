@@ -85,7 +85,10 @@ namespace Game.Maps
 
                         if (Util.Global.GetRandomInt(0, 5) == 1)
                         {
-                            Room[0, w + Util.Global.GetRandomInt(1,RW/2), h + Util.Global.GetRandomInt(1, RH/2)] = Items.Item.ItemType.Shop;
+                            if (Util.Global.GetRandomInt(0, 1) == 1)
+                                Room[0, w + Util.Global.GetRandomInt(1,RW/2), h + Util.Global.GetRandomInt(1, RH/2)] = Items.Item.ItemType.Shop;
+                            else
+                                Room[0, w + Util.Global.GetRandomInt(1, RW / 2), h + Util.Global.GetRandomInt(1, RH / 2)] = Items.Item.ItemType.dungeonentrance;
                         }
                         else if (Util.Global.GetRandomInt(0, 5) == 1)
                         {

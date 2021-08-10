@@ -9,8 +9,8 @@ namespace Game.Maps
     public static class MapData
     {
 
-    public enum MapPart { caveEntrance, field, forrest, lavapond, mountain, pond, ridge, river, room, spawner, start, testDebug, totem, vein, volcano, town}
-    public enum Biome { Grass, Mini, Cave, Shop, Stable, Fish }
+    public enum MapPart { caveEntrance, field, forrest, lavapond, mountain, pond, ridge, river, room, spawner, start, testDebug, totem, vein, volcano, town, carve, dungeonEntrance}
+    public enum Biome { Grass, Mini, Cave, Shop, Stable, Fish, Dungeon }
 
     public static List<MapItems> GameMapItems { get; set; }
     public static List<MapMapParts> GameMapParts { get; set; }
@@ -142,7 +142,11 @@ namespace Game.Maps
         MP = new MapMapParts(); MP.mapPart = MapPart.lavapond;
         B = new List<Biome>(); B.Add(Biome.Grass); B.Add(Biome.Cave);
         MP.chance = 1F; MP.minLevel = 3; MP.biomes = B; GameMapParts.Add(MP);
-    }
+
+        MP = new MapMapParts(); MP.mapPart = MapPart.carve;
+        B = new List<Biome>(); B.Add(Biome.Dungeon);
+        MP.chance = 1F; MP.minLevel = 0; MP.biomes = B; GameMapParts.Add(MP);
+        }
 
     public static void Init_MI()
         {
@@ -175,6 +179,10 @@ namespace Game.Maps
             MI.chance = Util.Global.GetRandomFloat(.0001F, .001F); MI.minLevel = 0; MI.biomes = B; GameMapItems.Add(MI);
 
             MI = new MapItems(); MI.itemType = Items.Item.ItemType.CaveEntrance;
+            B = new List<Biome>(); B.Add(Biome.Grass);
+            MI.chance = .0001F; MI.minLevel = 1; MI.biomes = B; GameMapItems.Add(MI);
+
+            MI = new MapItems(); MI.itemType = Items.Item.ItemType.dungeonentrance;
             B = new List<Biome>(); B.Add(Biome.Grass);
             MI.chance = .0001F; MI.minLevel = 1; MI.biomes = B; GameMapItems.Add(MI);
 

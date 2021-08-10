@@ -226,6 +226,17 @@ Content\Music\gone_fishin.xnb
 Content\Images\Prop\fish.xnb
 Content\Sounds\bubbles.xnb
 Content\Images\Item\FishPole.xnb
+Content\Images\Tile\floor3.xnb
+Content\Images\Prop\candle.xnb
+Content\Images\Prop\web.xnb
+Content\Images\Prop\pillar.xnb
+Content\Music\descent.xnb
+Content\Music\dungeonblue.xnb
+Content\Music\Minstrel_Dance.xnb
+Content\Music\narrow_corridors_short.xnb
+Content\Images\Item\castle.xnb
+Content\Images\Item\tower.xnb
+Content\Images\Enemy\ghost.xnb
 Content\Music\town.wma
 Content\Music\fight.wma
 Content\Music\explore.wma
@@ -238,3 +249,7 @@ Content\Music\musicauniversalis.wma
 Content\Music\FantasyOrchestralTheme.wma
 Content\Wildlife.wmv
 Content\Music\gone_fishin.wma
+Content\Music\descent.wma
+Content\Music\dungeonblue.wma
+Content\Music\Minstrel_Dance.wma
+Content\Music\narrow_corridors_short.wma

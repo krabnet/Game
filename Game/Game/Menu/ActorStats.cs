@@ -168,7 +168,7 @@ namespace Game.Menu
             Util.Global.Sprites.Where(x => x.name == "UpgradePet").FirstOrDefault().orderNum = 10980;
             List<Object> obj3 = new List<object>();
             obj3.Add(Util.Global.Sprites.Where(x => x.ID == Actor.ID).FirstOrDefault());
-            ActionCall call3 = new ActionCall(ActionType.Mouse, typeof(Fight), "UpgradePet", obj3);
+            ActionCall call3 = new ActionCall(ActionType.Mouse, typeof(Stable), "UpgradePet", obj3);
             Util.Global.Sprites.Where(x => x.name == "UpgradePet").FirstOrDefault().actionCall.Add(call3);
         }
 
@@ -184,7 +184,7 @@ namespace Game.Menu
             Util.Global.Sprites.Where(x => x.name == "HealPet").FirstOrDefault().orderNum = 10980;
             List<Object> obj3 = new List<object>();
             obj3.Add(Util.Global.Sprites.Where(x => x.ID == Actor.ID).FirstOrDefault());
-            ActionCall call3 = new ActionCall(ActionType.Mouse, typeof(Fight), "HealPet", obj3);
+            ActionCall call3 = new ActionCall(ActionType.Mouse, typeof(Stable), "HealPet", obj3);
             Util.Global.Sprites.Where(x => x.name == "HealPet").FirstOrDefault().actionCall.Add(call3);
         }
 

@@ -11,12 +11,13 @@ namespace Game.Actions
 {
     public static class Enemy
     {
-        public enum EnemyType { LightBug, Ant, Worm, Bee, Beetle, Fly, Moth, Frog, Salamander, Lizard, Snake, Turtle, Alligator, Chameleon }
+        public enum EnemyType { LightBug, Ant, Worm, Bee, Beetle, Fly, Moth, Frog, Salamander, Lizard, Snake, Turtle, Alligator, Chameleon, Ghost, None }
 
         public static void SpawnEnemy()
         {
-            if (!Util.Global.Fighting)
+            if (!Util.Global.Fighting && !Enviro.InCave())
             {
+                Util.Base.Log("Spawning Enemy...");
                 Vector3 Distance = Vector3.Subtract(new Vector3(50, 50, 0), Util.Global.CurrentMap);
                 int EnemyLevel = (int)Math.Abs(Distance.X) + (int)Math.Abs(Distance.Y);
 
@@ -28,7 +29,7 @@ namespace Game.Actions
                     x = Util.Global.GetRandomInt(5, 95);
                     y = Util.Global.GetRandomInt(5, 95);
                     Objects.Sprite2d Tile = Util.Global.Sprites.Where(z => z.name == x.ToString() + ":" + y.ToString()).FirstOrDefault();
-                    if (Tile.modelname == "grass0")
+                    if (Tile!=null && Tile.modelname == "grass0")
                     {
                         SpawnLoc = false;
                     }
@@ -53,19 +54,22 @@ namespace Game.Actions
         {
             EnemyType ET = new EnemyType();
             ET = (EnemyType)level;
-            return GetEnemyByType(ET, Position);
+            return GetEnemyByType(ET, Position, level);
         }
 
-        public static Objects.Sprite2d GetEnemyByType(EnemyType ET, Vector2 Position)
+        public static Objects.Sprite2d GetEnemyByType(EnemyType ET, Vector2 Position, int level)
         {
+            if (level == 0)
+                level = 1;
+
             string imagename = ET.ToString().ToLower();
             Objects.Sprite2d S = new Objects.Sprite2d(imagename, Guid.NewGuid().ToString(), true, Position, new Vector2(50, 50), 10, Objects.Base.ControlType.AI);
             S.orderNum = 899;
             S.clipping = true;
-            S.speed = 5 + (int)ET;
+            S.speed = 5 + level;
             Objects.Actor actor = new Objects.Actor();
-            actor.Level = (int)ET;
-            actor.Health = 5 * (int)ET;
+            actor.Level = level;
+            actor.Health = 5 * level;
             actor.actorType = Objects.Actor.ActorType.Enemy;
             actor.enemyType = ET;
             actor.Buffs = new List<Buff.BuffType>();
@@ -74,7 +78,7 @@ namespace Game.Actions
             S.Actor = actor;
             if (Util.Global.GetRandomInt(1, 100) > 80)
             {
-                actor.Level = (int)ET + 1;
+                actor.Level = level + 1;
                 S.color = Util.Colors.GetRandom();
                 S.LightIgnor = true;
                 S.Size = new Vector2(65, 65);
@@ -89,7 +93,7 @@ namespace Game.Actions
             Objs3.Add(S);
             S.actionCall.Add(new Actions.ActionCall(Game.Actions.ActionType.Collision, typeof(Actions.Fight), "DisplayFight", Objs3));
 
-            S.Actor.Drops.AddRange(GetCoinDrop((int)ET));
+            S.Actor.Drops.AddRange(GetCoinDrop(level));
             return AddAbility(S);
         }
 
@@ -109,10 +113,17 @@ namespace Game.Actions
             EnemyType ET = Enemy.Actor.enemyType;
             switch (ET)
             {
+                case EnemyType.Ghost:
+                    Enemy.Actor.Drops.Add(new Tuple<Items.Item.ItemType, float>(Items.Item.ItemType.Oil, 1F));
+                    Enemy.Actor.Drops.Add(new Tuple<Items.Item.ItemType, float>(Items.Item.ItemType.Oil, .3F));
+                    Enemy.Actor.Drops.Add(new Tuple<Items.Item.ItemType, float>(Items.Item.ItemType.GoldBar, .3F));
+                    Enemy.Actor.Parents.Add(EnemyType.None);
+                    break;
+
                 case EnemyType.LightBug:
                     Enemy.speed = 10;
                     Enemy.LightSourceDistance = 100f;
-                    Enemy.Actor.Level = 1;
+                    //Enemy.Actor.Level = 1;
                     Enemy.Actor.CalculateStats();
                     Enemy.Actor.Health = 5;
                     Enemy.Actor.HealthMax = 10;

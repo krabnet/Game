@@ -151,7 +151,9 @@ namespace Game.Items
 
         public static void CollisionPickup(Objects.Sprite2d Item)
         {
-            if (Item.Item.State != Items.Item.ItemState.Hand)
+            Util.Base.Log("CollisionPickup:" + Item.name);
+
+            if (Item.active && Item.Item.State != Items.Item.ItemState.Hand && Item.Item.State != Items.Item.ItemState.Inventory)
             {
                 Util.Global.Sprites.RemoveAll(x => x.ID == Item.ID);
                 int count = 1;
@@ -498,7 +500,7 @@ namespace Game.Items
 
             foreach(Actions.Enemy.EnemyType ET in Enum.GetValues(typeof(Actions.Enemy.EnemyType)))
             {
-                Objects.Sprite2d Actor = Actions.Enemy.GetEnemyByType(ET,new Vector2(0,0));
+                Objects.Sprite2d Actor = Actions.Enemy.GetEnemyByType(ET,new Vector2(0,0),1);
 
                 string TotemText = "";
                 if (Actor.Actor.Parents.Count() > 0)

@@ -9,12 +9,13 @@ namespace Game.Actions
     {
         public enum Weather { Clear, Rain, Snow }
         public enum SeasonType { SpringEarly, Spring, SpringLate, SummerEarly, Summer, SummerLate, FallEarly, Fall, FallLate, WinterEarly, Winter, WinterLate }
-        public enum Music { blobbit, commencement, explore, fairyspringtune, sombrero, town, musicauniversalis, FantasyOrchestralTheme }
+        public enum Music { blobbit, commencement, explore, fairyspringtune, sombrero, town, musicauniversalis, FantasyOrchestralTheme, Minstrel_Dance }
+        public enum DarkMusic { descent, dungeonblue, narrow_corridors_short }
         public enum TimeName { Dawn, Day, Dusk, Night }
 
         public static bool InCave()
         {
-            if (Util.Global.CurrentMap.Z == 1)
+            if (Util.Global.CurrentMap.Z == 1 || Util.Global.CurrentMap.Z == 10)
                 return true;
             else
                 return false;
